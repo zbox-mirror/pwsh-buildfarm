@@ -71,7 +71,12 @@ function New-BuildImage() {
     Repair-WindowsImage -Path "$($dir_mnt)" -StartComponentCleanup -ResetBase
     Start-Sleep -s $sleep
 
-    # Save Windows image.
+    # Scan health Windows image.
+    Write-Host "--- Scan Health Windows Image..."
+    Repair-WindowsImage -Path "$($dir_mnt)" -ScanHealth
+    Start-Sleep -s $sleep
+
+    # Save & dismount Windows image.
     Write-Host "--- Dismount Windows Image..."
     Dismount-WindowsImage -Path "$($dir_mnt)" -Save
     Start-Sleep -s $sleep

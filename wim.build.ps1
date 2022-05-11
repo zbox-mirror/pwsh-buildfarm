@@ -52,7 +52,7 @@ function New-BuildImage() {
     # Get Windows image info.
     Write-Host "--- Get Windows Image Info..."
     Get-WindowsImage -ImagePath "$($d_wim)\install.wim"
-    [int]$wim_index = Read-Host "Enter WIM index (Press [ENTER] to exit)"
+    [int]$wim_index = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
     if ( ! $wim_index ) { break }
 
     # Mount Windows image.

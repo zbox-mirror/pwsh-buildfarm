@@ -15,13 +15,19 @@ function Start-BuildInit() {
 
 function New-BuildImage() {
   $dir_drv = "$($PSScriptRoot)\drivers"
+  $dir_log = "$($PSScriptRoot)\logs"
   $dir_mnt = "$($PSScriptRoot)\mount"
   $dir_upd = "$($PSScriptRoot)\updates"
   $dir_wim = "$($PSScriptRoot)\wim"
+  $ts = Get-Date -Format "yyyy-MM-dd.HH-mm"
   [int]$sleep = 5
 
   if ( ! ( Test-Path "$($dir_drv)" ) ) {
     New-Item -Path "$($dir_drv)" -ItemType "Directory"
+  }
+
+  if ( ! ( Test-Path "$($dir_log)" ) ) {
+    New-Item -Path "$($dir_log)" -ItemType "Directory"
   }
 
   if ( ! ( Test-Path "$($dir_mnt)" ) ) {
@@ -37,7 +43,7 @@ function New-BuildImage() {
   }
 
   # Start build log.
-  Start-Transcript -Path "$($PSScriptRoot)\wim.build.log"
+  Start-Transcript -Path "$($PSScriptRoot)\$($dir_log)\wim.build.$($ts).log"
 
   while ( $true ) {
     # Check WIM file.

@@ -76,7 +76,7 @@ function New-BuildImage() {
     Start-Sleep -s $sleep
 
     # Reset Windows image.
-    Write-Host "--- Reset & Save Windows Image..."
+    Write-Host "--- Reset Windows Image..."
     Repair-WindowsImage -Path "$($d_mnt)" -StartComponentCleanup -ResetBase
     Start-Sleep -s $sleep
 
@@ -86,7 +86,7 @@ function New-BuildImage() {
     Start-Sleep -s $sleep
 
     # Save & dismount Windows image.
-    Write-Host "--- Dismount Windows Image..."
+    Write-Host "--- Save & Dismount Windows Image..."
     Dismount-WindowsImage -Path "$($d_mnt)" -Save
     Start-Sleep -s $sleep
 

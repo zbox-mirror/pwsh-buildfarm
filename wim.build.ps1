@@ -19,7 +19,7 @@ function New-BuildImage() {
   $d_mnt = "$($PSScriptRoot)\mount"
   $d_upd = "$($PSScriptRoot)\updates"
   $d_wim = "$($PSScriptRoot)\wim"
-  $ts = Get-Date -Format "yyyy-MM-dd.HH-mm"
+  $ts = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
   [int]$sleep = 5
 
   if ( ! ( Test-Path "$($d_drv)" ) ) {

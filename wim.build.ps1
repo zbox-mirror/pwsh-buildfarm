@@ -43,7 +43,7 @@ function New-BuildImage() {
   }
 
   # Start build log.
-  Start-Transcript -Path "$($PSScriptRoot)\$($d_log)\wim.build.$($ts).log"
+  Start-Transcript -Path "$($d_log)\wim.build.$($ts).log"
 
   while ( $true ) {
     # Check WIM file.
@@ -52,7 +52,7 @@ function New-BuildImage() {
     # Get Windows image info.
     Write-Host "--- Get Windows Image Info..."
     Get-WindowsImage -ImagePath "$($d_wim)\install.wim"
-    [int]$wim_index = Read-Host "Enter WIM index (CTRL+C to EXIT)"
+    [int]$wim_index = Read-Host "Enter WIM index (Press [ENTER] to exit)"
     if ( ! $wim_index ) { break }
 
     # Mount Windows image.

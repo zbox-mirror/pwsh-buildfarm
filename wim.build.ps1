@@ -36,6 +36,9 @@ function New-BuildImage() {
     New-Item -Path "$($dir_wim)" -ItemType "Directory"
   }
 
+  # Start build log.
+  Start-Transcript -Path "$($PSScriptRoot)\wim.build.log"
+
   while ( $true ) {
     # Check WIM file.
     if ( ! ( Test-Path -Path "$($dir_wim)\install.wim" -PathType leaf ) ) { break }
@@ -86,6 +89,9 @@ function New-BuildImage() {
     Dism /Export-Image /SourceImageFile:"$($dir_wim)\install.wim" /SourceIndex:$wim_index /DestinationImageFile:"$($dir_wim)\install.esd" /Compress:recovery /CheckIntegrity
     Start-Sleep -s $sleep
   }
+
+  # Stop build log.
+  Stop-Transcript
 }
 
 # -------------------------------------------------------------------------------------------------------------------- #

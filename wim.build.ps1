@@ -23,29 +23,12 @@ function New-BuildImage() {
   $ts = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
   [int]$sleep = 5
 
-  if ( ! ( Test-Path "$($d_drv)" ) ) {
-    New-Item -Path "$($d_drv)" -ItemType "Directory"
-  }
-
-  if ( ! ( Test-Path "$($d_log)" ) ) {
-    New-Item -Path "$($d_log)" -ItemType "Directory"
-  }
-
-  if ( ! ( Test-Path "$($d_mnt)" ) ) {
-    New-Item -Path "$($d_mnt)" -ItemType "Directory"
-  }
-
-  if ( ! ( Test-Path "$($d_tmp)" ) ) {
-    New-Item -Path "$($d_tmp)" -ItemType "Directory"
-  }
-
-  if ( ! ( Test-Path "$($d_upd)" ) ) {
-    New-Item -Path "$($d_upd)" -ItemType "Directory"
-  }
-
-  if ( ! ( Test-Path "$($d_wim)" ) ) {
-    New-Item -Path "$($d_wim)" -ItemType "Directory"
-  }
+  if ( ! ( Test-Path "$($d_drv)" ) ) { New-Item -Path "$($d_drv)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($d_log)" ) ) { New-Item -Path "$($d_log)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($d_mnt)" ) ) { New-Item -Path "$($d_mnt)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($d_tmp)" ) ) { New-Item -Path "$($d_tmp)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($d_upd)" ) ) { New-Item -Path "$($d_upd)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($d_wim)" ) ) { New-Item -Path "$($d_wim)" -ItemType "Directory" }
 
   # Start build log.
   Start-Transcript -Path "$($d_log)\wim.build.$($ts).log"

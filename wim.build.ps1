@@ -1,6 +1,20 @@
 #Requires -Version 7.2
 #Requires -RunAsAdministrator
 
+Param(
+  [Parameter(HelpMessage="Export WIM to ESD format.")]
+  [Alias("ESD")]
+  [switch]$ExportToESD = $false,
+
+  [Parameter(HelpMessage="Scans the image for component store corruption. This operation will take several minutes.")]
+  [Alias("SH")]
+  [switch]$ScanHealth = $false,
+
+  [Parameter(HelpMessage="Resets the base of superseded components to further reduce the component store size.")]
+  [Alias("RB")]
+  [switch]$ResetBase = $false
+)
+
 # -------------------------------------------------------------------------------------------------------------------- #
 # INITIALIZATION.
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -69,14 +83,18 @@ function New-BuildImage() {
     }
 
     # Reset Windows image.
-    Write-Host "--- Reset Windows Image..."
-    Repair-WindowsImage -Path "$($d_mnt)" -StartComponentCleanup -ResetBase -ScratchDirectory "$($d_tmp)"
-    Start-Sleep -s $sleep
+    if ( $ResetBase ) {
+      Write-Host "--- Reset Windows Image..."
+      Repair-WindowsImage -Path "$($d_mnt)" -StartComponentCleanup -ResetBase -ScratchDirectory "$($d_tmp)"
+      Start-Sleep -s $sleep
+    }
 
     # Scan health Windows image.
-    Write-Host "--- Scan Health Windows Image..."
-    Repair-WindowsImage -Path "$($d_mnt)" -ScanHealth -ScratchDirectory "$($d_tmp)"
-    Start-Sleep -s $sleep
+    if ( $ScanHealth ) {
+      Write-Host "--- Scan Health Windows Image..."
+      Repair-WindowsImage -Path "$($d_mnt)" -ScanHealth -ScratchDirectory "$($d_tmp)"
+      Start-Sleep -s $sleep
+    }
 
     # Save & dismount Windows image.
     Write-Host "--- Save & Dismount Windows Image..."
@@ -84,9 +102,11 @@ function New-BuildImage() {
     Start-Sleep -s $sleep
 
     # Export ESD.
-    Write-Host "--- Export Windows Image to ESD Format..."
-    Dism /Export-Image /SourceImageFile:"$($d_wim)\install.wim" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\install.esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
-    Start-Sleep -s $sleep
+    if ( $ExportToESD ) {
+      Write-Host "--- Export Windows Image to ESD Format..."
+      Dism /Export-Image /SourceImageFile:"$($d_wim)\install.wim" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\install.esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
+      Start-Sleep -s $sleep
+    }
   }
 
   # Stop build log.

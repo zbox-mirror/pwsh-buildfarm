@@ -12,7 +12,15 @@ Param(
 
   [Parameter(HelpMessage="Resets the base of superseded components to further reduce the component store size.")]
   [Alias("RB")]
-  [switch]$ResetBase = $false
+  [switch]$ResetBase = $false,
+
+  [Parameter(HelpMessage="Adds a single .cab or .msu file to a Windows image.")]
+  [Alias("AP")]
+  [switch]$AddPackages = $false,
+
+  [Parameter(HelpMessage="Adds a driver to an offline Windows image.")]
+  [Alias("AD")]
+  [switch]$AddDrivers = $false
 )
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -63,7 +71,7 @@ function New-BuildImage() {
     Mount-WindowsImage -ImagePath "$($d_wim)\install.wim" -Path "$($d_mnt)" -Index $wim_index -CheckIntegrity -ScratchDirectory "$($d_tmp)"
     Start-Sleep -s $sleep
 
-    if ( ! ( Get-ChildItem "$($d_upd)" | Measure-Object ).Count -eq 0 ) {
+    if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($d_upd)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
       Write-Host "--- Add Windows Packages..."
       Add-WindowsPackage -Path "$($d_mnt)" -PackagePath "$($d_upd)" -IgnoreCheck -ScratchDirectory "$($d_tmp)"
@@ -76,7 +84,7 @@ function New-BuildImage() {
     }
 
     # Add drivers.
-    if ( ! ( Get-ChildItem "$($d_drv)" | Measure-Object ).Count -eq 0 ) {
+    if ( ( $AddDrivers ) -and ( ! ( Get-ChildItem "$($d_drv)" | Measure-Object ).Count -eq 0 ) ) {
       Write-Host "--- Add Windows Drivers..."
       Add-WindowsDriver -Path "$($d_mnt)" -Driver "$($d_drv)" -Recurse -ScratchDirectory "$($d_tmp)"
       Start-Sleep -s $sleep

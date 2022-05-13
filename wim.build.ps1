@@ -57,8 +57,13 @@ function New-BuildImage() {
   Start-Transcript -Path "$($d_log)\wim.build.$($ts).log"
 
   while ( $true ) {
-    # Check WIM file.
+    # Check WIM file exist.
     if ( ! ( Test-Path -Path "$($d_wim)\install.wim" -PathType leaf ) ) { break }
+
+    # Get Windows image hash.
+    Write-Host "--- Get Windows Image Hash..."
+    Get-FileHash "$($d_wim)\install.wim" -Algorithm "SHA256" | Format-List
+    Start-Sleep -s $sleep
 
     # Get Windows image info.
     Write-Host "--- Get Windows Image Info..."

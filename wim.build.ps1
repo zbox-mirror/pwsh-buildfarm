@@ -2,25 +2,25 @@
 #Requires -RunAsAdministrator
 
 Param(
-  [Parameter(HelpMessage="Export WIM to ESD format.")]
-  [Alias("ESD")]
-  [switch]$ExportToESD = $false,
-
-  [Parameter(HelpMessage="Scans the image for component store corruption. This operation will take several minutes.")]
-  [Alias("SH")]
-  [switch]$ScanHealth = $false,
-
-  [Parameter(HelpMessage="Resets the base of superseded components to further reduce the component store size.")]
-  [Alias("RB")]
-  [switch]$ResetBase = $false,
-
   [Parameter(HelpMessage="Adds a single .cab or .msu file to a Windows image.")]
   [Alias("AP")]
   [switch]$AddPackages = $false,
 
   [Parameter(HelpMessage="Adds a driver to an offline Windows image.")]
   [Alias("AD")]
-  [switch]$AddDrivers = $false
+  [switch]$AddDrivers = $false,
+
+  [Parameter(HelpMessage="Resets the base of superseded components to further reduce the component store size.")]
+  [Alias("RB")]
+  [switch]$ResetBase = $false,
+
+  [Parameter(HelpMessage="Scans the image for component store corruption. This operation will take several minutes.")]
+  [Alias("SH")]
+  [switch]$ScanHealth = $false,
+
+  [Parameter(HelpMessage="Export WIM to ESD format.")]
+  [Alias("ESD")]
+  [switch]$ExportToESD = $false
 )
 
 # -------------------------------------------------------------------------------------------------------------------- #

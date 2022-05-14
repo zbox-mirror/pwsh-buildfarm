@@ -18,6 +18,10 @@ Param(
   [Alias("SH")]
   [switch]$ScanHealth = $false,
 
+  [Parameter(HelpMessage="Saves the changes to a Windows image.")]
+  [Alias("S")]
+  [switch]$Save = $false,
+
   [Parameter(HelpMessage="Export WIM to ESD format.")]
   [Alias("ESD")]
   [switch]$ExportToESD = $false
@@ -109,10 +113,16 @@ function New-BuildImage() {
       Start-Sleep -s $sleep
     }
 
-    # Save & dismount Windows image.
-    Write-Host "--- Save & Dismount Windows Image..."
-    Dismount-WindowsImage -Path "$($d_mnt)" -Save -ScratchDirectory "$($d_tmp)"
-    Start-Sleep -s $sleep
+    # Dismount Windows image.
+    if ( $Save ) {
+      Write-Host "--- Save & Dismount Windows Image..."
+      Dismount-WindowsImage -Path "$($d_mnt)" -Save -ScratchDirectory "$($d_tmp)"
+      Start-Sleep -s $sleep
+    } else {
+      Write-Host "--- Discard & Dismount Windows Image..."
+      Dismount-WindowsImage -Path "$($d_mnt)" -Discard -ScratchDirectory "$($d_tmp)"
+      Start-Sleep -s $sleep
+    }
 
     # Export Windows image to custom format.
     Write-Host "--- Export Windows Image to Custom Format..."

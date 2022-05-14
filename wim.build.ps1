@@ -139,7 +139,7 @@ function New-BuildImage() {
     }
 
     # Create Windows image archive.
-    Write-BuildMsg -Message "--- Create Windows Image Archive..."
+    Write-BuildMsg -Title -Message "--- Create Windows Image Archive..."
     if ( Test-Path -Path "$($d_wim)\install.custom.esd" -PathType "Leaf" ) {
       New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\install.custom.esd" -Out "$($d_wim)\install.custom.esd.7z"
     } elseif ( Test-Path -Path "$($d_wim)\install.custom.wim" -PathType "Leaf" ) {

@@ -141,9 +141,9 @@ function New-BuildImage() {
     # Create Windows image archive.
     Write-BuildMsg -Message "--- Create Windows Image Archive..."
     if ( Test-Path -Path "$($d_wim)\install.custom.esd" -PathType "Leaf" ) {
-      Start-7z -In "$($d_wim)\install.custom.esd" -Out "$($d_wim)\install.custom.esd.7z"
+      Start-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\install.custom.esd" -Out "$($d_wim)\install.custom.esd.7z"
     } elseif ( Test-Path -Path "$($d_wim)\install.custom.wim" -PathType "Leaf" ) {
-      Start-7z -In "$($d_wim)\install.custom.wim" -Out "$($d_wim)\install.custom.wim.7z"
+      Start-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\install.custom.wim" -Out "$($d_wim)\install.custom.wim.7z"
     } else {
       Write-Host "Not Found: 'install.custom.esd' or 'install.custom.wim'."
     }
@@ -172,11 +172,12 @@ function Write-BuildMsg() {
 
 function Start-7z() {
   param (
+    [string]$App,
     [string]$In,
     [string]$Out
   )
   $7zParams = "a", "-t7z", "$($In)", "$($Out)"
-  & "$($d_app)\7z\7za.exe" @7zParams
+  & "$($App)" @7zParams
 }
 
 # -------------------------------------------------------------------------------------------------------------------- #

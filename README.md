@@ -1,14 +1,30 @@
 # Windows PowerShell BuildFarm
 
+Windows PowerShell BuildFarm - скрипт, позволяющий модифицировать WIM образ системы.
+
+## Параметры
+
 - `-AddPackages` `-AP`  
-  Adds a single .cab or .msu file to a Windows image.
+  Добавление `.cab` или `.msu` файлов в Windows WIM.
 - `-AddDrivers` `-AD`  
-  Adds a driver to an offline Windows image.
+  Добавление драйверов в Windows WIM.
 - `-ResetBase` `-RB`  
-  Resets the base of superseded components to further reduce the component store size.
+  Уменьшение размера хранилища компонентов Windows WIM, путём удаления предыдущих версий компонентов.
 - `-ScanHealth` `-SH`  
-  Scans the image for component store corruption. This operation will take several minutes.
+  Сканирование образа Windows WIM на предмет повреждения хранилища компонентов.
 - `-SaveImage` `-SI`  
-  Saves the changes to a Windows image.
+  Сохранение изменений в Windows WIM.
 - `-ExportToESD` `-ESD`  
-  Export WIM to ESD format.
+  Экспорт WIM файла в ESD формат.
+
+## Директории
+
+- `BuildFarm`
+  - `Apps` - Приложения.
+  - `Drivers` - Хранилище драйверов.
+  - `ISO` - ISO образа системы.
+  - `Logs` - Логи работы скрипта.
+  - `Mount` - Директория для монтирования Windows WIM.
+  - `Temp` - Директория для временных файлов.
+  - `Updates` - Хранилище обновлений.
+  - `WIM` - Директория расположения WIM файла.

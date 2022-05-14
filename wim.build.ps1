@@ -141,9 +141,11 @@ function New-BuildImage() {
     # Create Windows image archive.
     Write-BuildMsg -Message "--- Create Windows Image Archive..."
     if ( Test-Path -Path "$($d_wim)\install.custom.esd" -PathType "Leaf" ) {
-      "$($d_app)\7z\7za.exe" a -t7z "$($d_wim)\install.custom.esd" "$($d_wim)\install.custom.esd.7z"
+      $7zParams = "a", "-t7z", "$($d_wim)\install.custom.esd", "$($d_wim)\install.custom.esd.7z"
+      & "$($d_app)\7z\7za.exe" @7zParams
     } elseif ( Test-Path -Path "$($d_wim)\install.custom.wim" -PathType "Leaf" ) {
-      "$($d_app)\7z\7za.exe" a -t7z "$($d_wim)\install.custom.wim" "$($d_wim)\install.custom.wim.7z"
+      $7zParams = "a", "-t7z", "$($d_wim)\install.custom.wim", "$($d_wim)\install.custom.wim.7z"
+      & "$($d_app)\7z\7za.exe" @7zParams
     } else {
       Write-Host "Not Found: 'install.custom.esd' or 'install.custom.wim'."
     }

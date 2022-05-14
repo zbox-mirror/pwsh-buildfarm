@@ -41,12 +41,12 @@ function Start-BuildInit() {
 # -------------------------------------------------------------------------------------------------------------------- #
 
 function New-BuildImage() {
-  $d_drv = "$($PSScriptRoot)\drivers"
-  $d_log = "$($PSScriptRoot)\logs"
-  $d_mnt = "$($PSScriptRoot)\mount"
-  $d_tmp = "$($PSScriptRoot)\temp"
-  $d_upd = "$($PSScriptRoot)\updates"
-  $d_wim = "$($PSScriptRoot)\wim"
+  $d_drv = "$($PSScriptRoot)\Drivers"
+  $d_log = "$($PSScriptRoot)\Logs"
+  $d_mnt = "$($PSScriptRoot)\Mount"
+  $d_tmp = "$($PSScriptRoot)\Temp"
+  $d_upd = "$($PSScriptRoot)\Updates"
+  $d_wim = "$($PSScriptRoot)\WIM"
   $ts = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
   [int]$sleep = 5
 

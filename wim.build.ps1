@@ -176,7 +176,7 @@ function New-7z() {
     [string]$In,
     [string]$Out
   )
-  $7zParams = "a", "-t7z", "$($In)", "$($Out)"
+  $7zParams = "a", "-t7z", "$($Out)", "$($In)"
   & "$($App)" @7zParams
 }
 

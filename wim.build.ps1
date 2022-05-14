@@ -140,9 +140,9 @@ function New-BuildImage() {
 
     # Create Windows image archive.
     Write-BuildMsg -Message "--- Create Windows Image Archive..."
-    if ( ! ( Test-Path -Path "$($d_wim)\install.custom.esd" -PathType Leaf ) ) {
+    if ( Test-Path -Path "$($d_wim)\install.custom.esd" -PathType Leaf ) {
       "$($d_app)\7z\7za.exe" a -t7z "$($d_wim)\install.custom.esd" "$($d_wim)\install.custom.esd.7z"
-    } elseif ( ! ( Test-Path -Path "$($d_wim)\install.custom.wim" -PathType Leaf ) ) {
+    } elseif ( Test-Path -Path "$($d_wim)\install.custom.wim" -PathType Leaf ) {
       "$($d_app)\7z\7za.exe" a -t7z "$($d_wim)\install.custom.wim" "$($d_wim)\install.custom.wim.7z"
     } else {
       Write-Host "Not Found: 'install.custom.esd' or 'install.custom.wim'."
@@ -163,7 +163,7 @@ function Write-BuildMsg() {
     [string]$Message,
     [switch]$Title = $false
   )
-  if ($Title) {
+  if ( $Title ) {
     Write-Host "$($Message)" -ForegroundColor Blue
   } else {
     Write-Host "$($Message)"

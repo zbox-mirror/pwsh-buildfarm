@@ -41,6 +41,7 @@ function Start-BuildInit() {
 # -------------------------------------------------------------------------------------------------------------------- #
 
 function New-BuildImage() {
+  # Directories.
   $d_app = "$($PSScriptRoot)\Apps"
   $d_drv = "$($PSScriptRoot)\Drivers"
   $d_log = "$($PSScriptRoot)\Logs"
@@ -48,9 +49,18 @@ function New-BuildImage() {
   $d_tmp = "$($PSScriptRoot)\Temp"
   $d_upd = "$($PSScriptRoot)\Updates"
   $d_wim = "$($PSScriptRoot)\WIM"
+
+  # Timestamp.
   $ts = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
+
+  # WIM names.
+  $wim_original = "install"
+  $wim_custom = "install.custom.$($ts)"
+
+  # Sleep time.
   [int]$sleep = 5
 
+  # Check directories.
   if ( ! ( Test-Path "$($d_app)" ) ) { New-Item -Path "$($d_app)" -ItemType "Directory" }
   if ( ! ( Test-Path "$($d_drv)" ) ) { New-Item -Path "$($d_drv)" -ItemType "Directory" }
   if ( ! ( Test-Path "$($d_log)" ) ) { New-Item -Path "$($d_log)" -ItemType "Directory" }
@@ -64,22 +74,22 @@ function New-BuildImage() {
 
   while ( $true ) {
     # Check WIM file exist.
-    if ( ! ( Test-Path -Path "$($d_wim)\install.wim" -PathType "Leaf" ) ) { break }
+    if ( ! ( Test-Path -Path "$($d_wim)\$($wim_original).wim" -PathType "Leaf" ) ) { break }
 
     # Get Windows image hash.
     Write-BuildMsg -Title -Message "--- Get Windows Image Hash..."
-    Get-FileHash "$($d_wim)\install.wim" -Algorithm "SHA256" | Format-List
+    Get-FileHash "$($d_wim)\$($wim_original).wim" -Algorithm "SHA256" | Format-List
     Start-Sleep -s $sleep
 
     # Get Windows image info.
     Write-BuildMsg -Title -Message "--- Get Windows Image Info..."
-    Get-WindowsImage -ImagePath "$($d_wim)\install.wim" -ScratchDirectory "$($d_tmp)"
+    Get-WindowsImage -ImagePath "$($d_wim)\$($wim_original).wim" -ScratchDirectory "$($d_tmp)"
     [int]$wim_index = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
     if ( ! $wim_index ) { break }
 
     # Mount Windows image.
     Write-BuildMsg -Title -Message "--- Mount Windows Image..."
-    Mount-WindowsImage -ImagePath "$($d_wim)\install.wim" -Path "$($d_mnt)" -Index $wim_index -CheckIntegrity -ScratchDirectory "$($d_tmp)"
+    Mount-WindowsImage -ImagePath "$($d_wim)\$($wim_original).wim" -Path "$($d_mnt)" -Index $wim_index -CheckIntegrity -ScratchDirectory "$($d_tmp)"
     Start-Sleep -s $sleep
 
     if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($d_upd)" | Measure-Object ).Count -eq 0 ) ) {
@@ -129,23 +139,23 @@ function New-BuildImage() {
     if ( $ExportToESD ) {
       # Export Windows image to custom ESD format.
       Write-BuildMsg -Title -Message "--- Export Windows Image to Custom ESD Format..."
-      Dism /Export-Image /SourceImageFile:"$($d_wim)\install.wim" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\install.custom.esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
+      Dism /Export-Image /SourceImageFile:"$($d_wim)\$($wim_original).wim" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($wim_custom).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     } else {
       # Export Windows image to custom WIM format.
       Write-BuildMsg -Title -Message "--- Export Windows Image to Custom WIM Format..."
-      Export-WindowsImage -SourceImagePath "$($d_wim)\install.wim" -SourceIndex $wim_index -DestinationImagePath "$($d_wim)\install.custom.wim" -CompressionType "max" -CheckIntegrity -ScratchDirectory "$($d_tmp)"
+      Export-WindowsImage -SourceImagePath "$($d_wim)\$($wim_original).wim" -SourceIndex $wim_index -DestinationImagePath "$($d_wim)\$($wim_custom).wim" -CompressionType "max" -CheckIntegrity -ScratchDirectory "$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Create Windows image archive.
     Write-BuildMsg -Title -Message "--- Create Windows Image Archive..."
-    if ( Test-Path -Path "$($d_wim)\install.custom.esd" -PathType "Leaf" ) {
-      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\install.custom.esd" -Out "$($d_wim)\install.custom.esd.7z"
-    } elseif ( Test-Path -Path "$($d_wim)\install.custom.wim" -PathType "Leaf" ) {
-      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\install.custom.wim" -Out "$($d_wim)\install.custom.wim.7z"
+    if ( Test-Path -Path "$($d_wim)\$($wim_custom).esd" -PathType "Leaf" ) {
+      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\$($wim_custom).esd" -Out "$($d_wim)\$($wim_custom).esd.7z"
+    } elseif ( Test-Path -Path "$($d_wim)\$($wim_custom).wim" -PathType "Leaf" ) {
+      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\$($wim_custom).wim" -Out "$($d_wim)\$($wim_custom).wim.7z"
     } else {
-      Write-Host "Not Found: 'install.custom.esd' or 'install.custom.wim'."
+      Write-Host "Not Found: '$($wim_custom).esd' or '$($wim_custom).wim'."
     }
     Start-Sleep -s $sleep
   }

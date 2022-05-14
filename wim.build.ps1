@@ -150,20 +150,24 @@ function New-BuildImage {
     Start-Sleep -s $sleep
   }
 
-  function Write-BuildMsg {
-    param (
-      [string]$Message,
-      [switch]$Title = $false
-    )
-    if ($Title) {
-      Write-Host "$($Message)" -ForegroundColor Blue
-    } else {
-      Write-Host "$($Message)"
-    }
-  }
-
   # Stop build log.
   Stop-Transcript
+}
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# ------------------------------------------------< COMMON FUNCTIONS >------------------------------------------------ #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+function Write-BuildMsg {
+  param (
+    [string]$Message,
+    [switch]$Title = $false
+  )
+  if ($Title) {
+    Write-Host "$($Message)" -ForegroundColor Blue
+  } else {
+    Write-Host "$($Message)"
+  }
 }
 
 # -------------------------------------------------------------------------------------------------------------------- #

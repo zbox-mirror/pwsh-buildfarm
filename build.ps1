@@ -2,6 +2,10 @@
 #Requires -RunAsAdministrator
 
 Param(
+  [Parameter(HelpMessage="Disable hash value for a WIM file.")]
+  [Alias("NoWH")]
+  [switch]$NoWimHash = $false,
+
   [Parameter(HelpMessage="Adds a single .cab or .msu file to a Windows image.")]
   [Alias("AP")]
   [switch]$AddPackages = $false,
@@ -77,9 +81,11 @@ function New-BuildImage() {
     if ( ! ( Test-Path -Path "$($d_wim)\$($f_wim_original)" -PathType "Leaf" ) ) { break }
 
     # Get Windows image hash.
-    Write-BuildMsg -Title -Message "--- Get Windows Image Hash..."
-    Get-FileHash "$($d_wim)\$($f_wim_original)" -Algorithm "SHA256" | Format-List
-    Start-Sleep -s $sleep
+    if ( ! $NoWimHash ) {
+      Write-BuildMsg -Title -Message "--- Get Windows Image Hash..."
+      Get-FileHash "$($d_wim)\$($f_wim_original)" -Algorithm "SHA256" | Format-List
+      Start-Sleep -s $sleep
+    }
 
     # Get Windows image info.
     Write-BuildMsg -Title -Message "--- Get Windows Image Info..."

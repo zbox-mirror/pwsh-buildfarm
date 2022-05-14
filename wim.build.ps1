@@ -54,8 +54,8 @@ function New-BuildImage() {
   $ts = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
 
   # WIM names.
-  $wim_original = "install.wim"
-  $wim_custom = "install.custom.$($ts).wim"
+  $f_wim_original = "install.wim"
+  $f_wim_custom = "install.custom.$($ts).wim"
 
   # Sleep time.
   [int]$sleep = 5
@@ -74,22 +74,22 @@ function New-BuildImage() {
 
   while ( $true ) {
     # Check WIM file exist.
-    if ( ! ( Test-Path -Path "$($d_wim)\$($wim_original)" -PathType "Leaf" ) ) { break }
+    if ( ! ( Test-Path -Path "$($d_wim)\$($f_wim_original)" -PathType "Leaf" ) ) { break }
 
     # Get Windows image hash.
     Write-BuildMsg -Title -Message "--- Get Windows Image Hash..."
-    Get-FileHash "$($d_wim)\$($wim_original)" -Algorithm "SHA256" | Format-List
+    Get-FileHash "$($d_wim)\$($f_wim_original)" -Algorithm "SHA256" | Format-List
     Start-Sleep -s $sleep
 
     # Get Windows image info.
     Write-BuildMsg -Title -Message "--- Get Windows Image Info..."
-    Get-WindowsImage -ImagePath "$($d_wim)\$($wim_original)" -ScratchDirectory "$($d_tmp)"
+    Get-WindowsImage -ImagePath "$($d_wim)\$($f_wim_original)" -ScratchDirectory "$($d_tmp)"
     [int]$wim_index = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
     if ( ! $wim_index ) { break }
 
     # Mount Windows image.
     Write-BuildMsg -Title -Message "--- Mount Windows Image..."
-    Mount-WindowsImage -ImagePath "$($d_wim)\$($wim_original)" -Path "$($d_mnt)" -Index $wim_index -CheckIntegrity -ScratchDirectory "$($d_tmp)"
+    Mount-WindowsImage -ImagePath "$($d_wim)\$($f_wim_original)" -Path "$($d_mnt)" -Index $wim_index -CheckIntegrity -ScratchDirectory "$($d_tmp)"
     Start-Sleep -s $sleep
 
     if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($d_upd)" | Measure-Object ).Count -eq 0 ) ) {
@@ -139,23 +139,23 @@ function New-BuildImage() {
     if ( $ExportToESD ) {
       # Export Windows image to custom ESD format.
       Write-BuildMsg -Title -Message "--- Export Windows Image to Custom ESD Format..."
-      Dism /Export-Image /SourceImageFile:"$($d_wim)\$($wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($wim_custom).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
+      Dism /Export-Image /SourceImageFile:"$($d_wim)\$($f_wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($f_wim_custom).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     } else {
       # Export Windows image to custom WIM format.
       Write-BuildMsg -Title -Message "--- Export Windows Image to Custom WIM Format..."
-      Export-WindowsImage -SourceImagePath "$($d_wim)\$($wim_original)" -SourceIndex $wim_index -DestinationImagePath "$($d_wim)\$($wim_custom)" -CompressionType "max" -CheckIntegrity -ScratchDirectory "$($d_tmp)"
+      Export-WindowsImage -SourceImagePath "$($d_wim)\$($f_wim_original)" -SourceIndex $wim_index -DestinationImagePath "$($d_wim)\$($f_wim_custom)" -CompressionType "max" -CheckIntegrity -ScratchDirectory "$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Create Windows image archive.
     Write-BuildMsg -Title -Message "--- Create Windows Image Archive..."
-    if ( Test-Path -Path "$($d_wim)\$($wim_custom).esd" -PathType "Leaf" ) {
-      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\$($wim_custom).esd" -Out "$($d_wim)\$($wim_custom).esd.7z"
-    } elseif ( Test-Path -Path "$($d_wim)\$($wim_custom)" -PathType "Leaf" ) {
-      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\$($wim_custom)" -Out "$($d_wim)\$($wim_custom).7z"
+    if ( Test-Path -Path "$($d_wim)\$($f_wim_custom).esd" -PathType "Leaf" ) {
+      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\$($f_wim_custom).esd" -Out "$($d_wim)\$($f_wim_custom).esd.7z"
+    } elseif ( Test-Path -Path "$($d_wim)\$($f_wim_custom)" -PathType "Leaf" ) {
+      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\$($f_wim_custom)" -Out "$($d_wim)\$($f_wim_custom).7z"
     } else {
-      Write-Host "Not Found: '$($wim_custom)' or '$($wim_custom).esd'."
+      Write-Host "Not Found: '$($f_wim_custom)' or '$($f_wim_custom).esd'."
     }
     Start-Sleep -s $sleep
   }

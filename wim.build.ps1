@@ -128,12 +128,12 @@ function New-BuildImage {
 
     if ( $ExportToESD ) {
       # Export Windows image to custom ESD format.
-      Write-BuildMsg -Title  -Message "--- Export Windows Image to Custom ESD Format..."
+      Write-BuildMsg -Title -Message "--- Export Windows Image to Custom ESD Format..."
       Dism /Export-Image /SourceImageFile:"$($d_wim)\install.wim" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\install.custom.esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     } else {
       # Export Windows image to custom WIM format.
-      Write-BuildMsg -Title  -Message "--- Export Windows Image to Custom WIM Format..."
+      Write-BuildMsg -Title -Message "--- Export Windows Image to Custom WIM Format..."
       Export-WindowsImage -SourceImagePath "$($d_wim)\install.wim" -SourceIndex $wim_index -DestinationImagePath "$($d_wim)\install.custom.wim" -CompressionType "max" -CheckIntegrity -ScratchDirectory "$($d_tmp)"
       Start-Sleep -s $sleep
     }

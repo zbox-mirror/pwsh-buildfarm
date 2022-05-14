@@ -1,6 +1,6 @@
 # Windows PowerShell BuildFarm
 
-Windows PowerShell BuildFarm - скрипт, позволяющий модифицировать WIM образ системы.
+Скрипт, позволяющий модифицировать WIM образ системы.
 
 ## Параметры
 

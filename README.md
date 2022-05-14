@@ -32,7 +32,7 @@
 ## Синтаксис
 
 ```
-wim.build.ps1 -AP -AD -RB -SH -SI
+build.ps1 -AP -AD -RB -SH -SI
 ```
 
 1. Интегрировать обновления (`-AP`) и драйверы (`-AD`) в образ системы.
@@ -41,7 +41,7 @@ wim.build.ps1 -AP -AD -RB -SH -SI
 4. Сохранить все изменения (`-SI`).
 
 ```
-wim.build.ps1 -AP -RB -SH -SI
+build.ps1 -AP -RB -SH -SI
 ```
 
 1. Интегрировать обновления в образ системы (`-AP`).
@@ -50,7 +50,7 @@ wim.build.ps1 -AP -RB -SH -SI
 4. Сохранить все изменения (`-SI`).
 
 ```
-wim.build.ps1 -AP -RB -SH -SI -ESD
+build.ps1 -AP -RB -SH -SI -ESD
 ```
 
 1. Интегрировать обновления (`-AP`).

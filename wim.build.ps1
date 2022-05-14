@@ -31,7 +31,7 @@ Param(
 # INITIALIZATION.
 # -------------------------------------------------------------------------------------------------------------------- #
 
-function Start-BuildInit {
+function Start-BuildInit() {
   # Run.
   New-BuildImage
 }
@@ -40,7 +40,7 @@ function Start-BuildInit {
 # BUILD IMAGE.
 # -------------------------------------------------------------------------------------------------------------------- #
 
-function New-BuildImage {
+function New-BuildImage() {
   $d_app = "$($PSScriptRoot)\Apps"
   $d_drv = "$($PSScriptRoot)\Drivers"
   $d_log = "$($PSScriptRoot)\Logs"
@@ -158,7 +158,7 @@ function New-BuildImage {
 # ------------------------------------------------< COMMON FUNCTIONS >------------------------------------------------ #
 # -------------------------------------------------------------------------------------------------------------------- #
 
-function Write-BuildMsg {
+function Write-BuildMsg() {
   param (
     [string]$Message,
     [switch]$Title = $false

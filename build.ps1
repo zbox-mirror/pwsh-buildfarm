@@ -10,6 +10,10 @@
 #>
 
 Param(
+  [Parameter(HelpMessage="Enter WIM language.")]
+  [Alias("WL")]
+  [string]$WimLanguage = "en-us",
+
   [Parameter(HelpMessage="Disable hash value for a WIM file.")]
   [Alias("NoWH")]
   [switch]$NoWimHash = $false,
@@ -65,9 +69,9 @@ function New-BuildImage() {
   # Timestamp.
   $ts = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
 
-  # WIM names.
-  $f_wim_original = "install.wim"
-  $f_wim_custom = "install.custom.$($ts).wim"
+  # WIM path.
+  $f_wim_original = "$($WimLanguage)\install.wim"
+  $f_wim_custom = "$($WimLanguage)\install.custom.$($ts).wim"
 
   # Sleep time.
   [int]$sleep = 5

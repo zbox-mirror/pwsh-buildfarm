@@ -1,6 +1,14 @@
 #Requires -Version 7.2
 #Requires -RunAsAdministrator
 
+<#
+.SYNOPSIS
+  Windows WIM modification script.
+.DESCRIPTION
+  The script modifies the WIM image of the operating system.
+  Parameters define how the script works.
+#>
+
 Param(
   [Parameter(HelpMessage="Disable hash value for a WIM file.")]
   [Alias("NoWH")]

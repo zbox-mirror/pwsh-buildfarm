@@ -1,6 +1,3 @@
-#Requires -Version 7.2
-#Requires -RunAsAdministrator
-
 <#
 .SYNOPSIS
   Windows WIM modification script.
@@ -8,6 +5,9 @@
   The script modifies the WIM image of the operating system.
   Parameters define how the script works.
 #>
+
+#Requires -Version 7.2
+#Requires -RunAsAdministrator
 
 Param(
   [Parameter(HelpMessage="Enter WIM language.")]

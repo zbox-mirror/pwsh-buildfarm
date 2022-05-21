@@ -89,6 +89,7 @@ function Start-BuildImage() {
   Start-Transcript -Path "$($d_log)\wim.build.$($ts).log"
 
   while ( $true ) {
+
     # Check WIM file exist.
     if ( ! ( Test-Path -Path "$($d_wim)\$($f_wim_original)" -PathType "Leaf" ) ) { break }
 
@@ -176,6 +177,7 @@ function Start-BuildImage() {
       Write-Host "Not Found: '$($f_wim_custom)' or '$($f_wim_custom).esd'."
     }
     Start-Sleep -s $sleep
+
   }
 
   # Stop build log.

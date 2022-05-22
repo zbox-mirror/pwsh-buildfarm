@@ -1,4 +1,4 @@
-# Windows PowerShell BuildFarm
+# Windows PowerShell Build Farm
 
 Скрипт, позволяющий модифицировать WIM-образ системы.
 
@@ -35,7 +35,7 @@
 ## Синтаксис
 
 ```
-build.ps1 -AP -AD -RB -SH -SI
+.\BuildFarm.ps1 -AP -AD -RB -SH -SI
 ```
 
 1. Интегрировать обновления (`-AP`) и драйверы (`-AD`) в образ системы.
@@ -44,7 +44,7 @@ build.ps1 -AP -AD -RB -SH -SI
 4. Сохранить все изменения (`-SI`).
 
 ```
-build.ps1 -AP -RB -SH -SI
+.\BuildFarm.ps1 -AP -RB -SH -SI
 ```
 
 1. Интегрировать обновления в образ системы (`-AP`).
@@ -53,7 +53,7 @@ build.ps1 -AP -RB -SH -SI
 4. Сохранить все изменения (`-SI`).
 
 ```
-build.ps1 -AP -RB -SH -SI -ESD
+.\BuildFarm.ps1 -AP -RB -SH -SI -ESD
 ```
 
 1. Интегрировать обновления (`-AP`).

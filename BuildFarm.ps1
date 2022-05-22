@@ -2,7 +2,7 @@
 .SYNOPSIS
   Windows WIM modification script.
 .DESCRIPTION
-  The script modifies the WIM image of the operating system.
+  The script modifies WIM image of operating system.
   Parameters define how the script works.
 #>
 

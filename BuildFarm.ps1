@@ -47,7 +47,7 @@ Param(
 # INITIALIZATION.
 # -------------------------------------------------------------------------------------------------------------------- #
 
-function Start-Build() {
+function Start-BuildFarm() {
   # Directories.
   $d_app = "$($PSScriptRoot)\Apps"
   $d_drv = "$($PSScriptRoot)\Drivers"
@@ -68,7 +68,7 @@ function Start-Build() {
   [int]$sleep = 5
 
   # Run.
-  Start-BuildFarm
+  Start-BuildImage
 }
 
 # -------------------------------------------------------------------------------------------------------------------- #

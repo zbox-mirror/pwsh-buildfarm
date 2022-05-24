@@ -53,23 +53,23 @@ Param(
 
 function Start-BuildFarm() {
   # Directories.
-  $d_app = "$($PSScriptRoot)\Apps"
-  $d_drv = "$($PSScriptRoot)\Drivers"
-  $d_log = "$($PSScriptRoot)\Logs"
-  $d_mnt = "$($PSScriptRoot)\Mount"
-  $d_tmp = "$($PSScriptRoot)\Temp"
-  $d_upd = "$($PSScriptRoot)\Updates"
-  $d_wim = "$($PSScriptRoot)\WIM"
+  $D_APP = "$($PSScriptRoot)\Apps"
+  $D_DRV = "$($PSScriptRoot)\Drivers"
+  $D_LOG = "$($PSScriptRoot)\Logs"
+  $D_MNT = "$($PSScriptRoot)\Mount"
+  $D_TMP = "$($PSScriptRoot)\Temp"
+  $D_UPD = "$($PSScriptRoot)\Updates"
+  $D_WIM = "$($PSScriptRoot)\WIM"
 
   # Timestamp.
-  $ts = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
+  $TS = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
 
   # WIM path.
-  $f_wim_original = "$($WimLanguage)\install.wim"
-  $f_wim_custom = "$($WimLanguage)\install.custom.$($ts).wim"
+  $F_WIM_ORIGINAL = "$($WimLanguage)\install.wim"
+  $F_WIM_CUSTOM = "$($WimLanguage)\install.custom.$($TS).wim"
 
   # Sleep time.
-  [int]$sleep = 10
+  [int]$SLEEP = 10
 
   # Run.
   Start-BuildImage
@@ -92,106 +92,106 @@ function Start-BuildImage() {
   }
 
   # Check directories.
-  if ( ! ( Test-Path "$($d_app)" ) ) { New-Item -Path "$($d_app)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($d_drv)" ) ) { New-Item -Path "$($d_drv)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($d_log)" ) ) { New-Item -Path "$($d_log)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($d_mnt)" ) ) { New-Item -Path "$($d_mnt)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($d_tmp)" ) ) { New-Item -Path "$($d_tmp)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($d_upd)" ) ) { New-Item -Path "$($d_upd)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($d_wim)" ) ) { New-Item -Path "$($d_wim)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($D_APP)" ) ) { New-Item -Path "$($D_APP)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($D_DRV)" ) ) { New-Item -Path "$($D_DRV)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($D_LOG)" ) ) { New-Item -Path "$($D_LOG)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($D_MNT)" ) ) { New-Item -Path "$($D_MNT)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($D_TMP)" ) ) { New-Item -Path "$($D_TMP)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($D_UPD)" ) ) { New-Item -Path "$($D_UPD)" -ItemType "Directory" }
+  if ( ! ( Test-Path "$($D_WIM)" ) ) { New-Item -Path "$($D_WIM)" -ItemType "Directory" }
 
   # Start build log.
-  Start-Transcript -Path "$($d_log)\wim.build.$($ts).log"
+  Start-Transcript -Path "$($D_LOG)\wim.build.$($TS).log"
 
   while ( $true ) {
 
     # Check WIM file exist.
-    if ( ! ( Test-Path -Path "$($d_wim)\$($f_wim_original)" -PathType "Leaf" ) ) { break }
+    if ( ! ( Test-Path -Path "$($D_WIM)\$($F_WIM_ORIGINAL)" -PathType "Leaf" ) ) { break }
 
     # Get Windows image hash.
     if ( ! $NoWimHash ) {
       Write-BFMsg -Title -Message "--- Get Windows Image Hash..."
-      Get-FileHash "$($d_wim)\$($f_wim_original)" -Algorithm "SHA256" | Format-List
-      Start-Sleep -s $sleep
+      Get-FileHash "$($D_WIM)\$($F_WIM_ORIGINAL)" -Algorithm "SHA256" | Format-List
+      Start-Sleep -s $SLEEP
     }
 
     # Get Windows image info.
     Write-BFMsg -Title -Message "--- Get Windows Image Info..."
-    Dism /Get-ImageInfo /ImageFile:"$($d_wim)\$($f_wim_original)" /ScratchDir:"$($d_tmp)"
-    [int]$wim_index = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
-    if ( ! $wim_index ) { break }
+    Dism /Get-ImageInfo /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /ScratchDir:"$($D_TMP)"
+    [int]$WIM_INDEX = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
+    if ( ! $WIM_INDEX ) { break }
 
     # Mount Windows image.
     Write-BFMsg -Title -Message "--- Mount Windows Image..."
-    Dism /Mount-Image /ImageFile:"$($d_wim)\$($f_wim_original)" /MountDir:"$($d_mnt)" /Index:$wim_index /CheckIntegrity /ScratchDir:"$($d_tmp)"
-    Start-Sleep -s $sleep
+    Dism /Mount-Image /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /MountDir:"$($D_MNT)" /Index:$WIM_INDEX /CheckIntegrity /ScratchDir:"$($D_TMP)"
+    Start-Sleep -s $SLEEP
 
-    if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($d_upd)" | Measure-Object ).Count -eq 0 ) ) {
+    if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
       Write-BFMsg -Title -Message "--- Add Windows Packages..."
-      Dism /Image:"$($d_mnt)" /Add-Package /PackagePath:"$($d_upd)" /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_UPD)" /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
 
       # Get packages.
       Write-BFMsg -Title -Message "--- Get Windows Packages..."
-      Dism /Image:"$($d_mnt)" /Get-Packages /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Image:"$($D_MNT)" /Get-Packages /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
     }
 
     # Add drivers.
-    if ( ( $AddDrivers ) -and ( ! ( Get-ChildItem "$($d_drv)" | Measure-Object ).Count -eq 0 ) ) {
+    if ( ( $AddDrivers ) -and ( ! ( Get-ChildItem "$($D_DRV)" | Measure-Object ).Count -eq 0 ) ) {
       Write-BFMsg -Title -Message "--- Add Windows Drivers..."
-      Dism /Image:"$($d_mnt)" /Add-Driver /Driver:"$($d_drv)" /Recurse /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Image:"$($D_MNT)" /Add-Driver /Driver:"$($D_DRV)" /Recurse /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
     }
 
     # Reset Windows image.
     if ( $ResetBase ) {
       Write-BFMsg -Title -Message "--- Reset Windows Image..."
-      Dism /Image:"$($d_mnt)" /Cleanup-Image /StartComponentCleanup /ResetBase /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Image:"$($D_MNT)" /Cleanup-Image /StartComponentCleanup /ResetBase /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
     }
 
     # Scan health Windows image.
     if ( $ScanHealth ) {
       Write-BFMsg -Title -Message "--- Scan Health Windows Image..."
-      Dism /Image:"$($d_mnt)" /Cleanup-Image /ScanHealth /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Image:"$($D_MNT)" /Cleanup-Image /ScanHealth /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
     }
 
     # Dismount Windows image.
     if ( $SaveImage ) {
       Write-BFMsg -Title -Message "--- Save & Dismount Windows Image..."
-      Dism /Unmount-Image /MountDir:"$($d_mnt)" /Commit /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Unmount-Image /MountDir:"$($D_MNT)" /Commit /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
     } else {
       Write-BFMsg -Title -Message "--- Discard & Dismount Windows Image..."
-      Dism /Unmount-Image /MountDir:"$($d_mnt)" /Discard /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Unmount-Image /MountDir:"$($D_MNT)" /Discard /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
     }
 
     if ( $ExportToESD ) {
       # Export Windows image to custom ESD format.
       Write-BFMsg -Title -Message "--- Export Windows Image to Custom ESD Format..."
-      Dism /Export-Image /SourceImageFile:"$($d_wim)\$($f_wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($f_wim_custom).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Export-Image /SourceImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /SourceIndex:$WIM_INDEX /DestinationImageFile:"$($D_WIM)\$($F_WIM_CUSTOM).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
     } else {
       # Export Windows image to custom WIM format.
       Write-BFMsg -Title -Message "--- Export Windows Image to Custom WIM Format..."
-      Dism /Export-Image /SourceImageFile:"$($d_wim)\$($f_wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($f_wim_custom)" /Compress:max /CheckIntegrity /ScratchDir:"$($d_tmp)"
-      Start-Sleep -s $sleep
+      Dism /Export-Image /SourceImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /SourceIndex:$WIM_INDEX /DestinationImageFile:"$($D_WIM)\$($F_WIM_CUSTOM)" /Compress:max /CheckIntegrity /ScratchDir:"$($D_TMP)"
+      Start-Sleep -s $SLEEP
     }
 
     # Create Windows image archive.
     Write-BFMsg -Title -Message "--- Create Windows Image Archive..."
-    if ( Test-Path -Path "$($d_wim)\$($f_wim_custom).esd" -PathType "Leaf" ) {
-      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\$($f_wim_custom).esd" -Out "$($d_wim)\$($f_wim_custom).esd.7z"
-    } elseif ( Test-Path -Path "$($d_wim)\$($f_wim_custom)" -PathType "Leaf" ) {
-      New-7z -App "$($d_app)\7z\7za.exe" -In "$($d_wim)\$($f_wim_custom)" -Out "$($d_wim)\$($f_wim_custom).7z"
+    if ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM).esd" -PathType "Leaf" ) {
+      New-7z -App "$($D_APP)\7z\7za.exe" -In "$($D_WIM)\$($F_WIM_CUSTOM).esd" -Out "$($D_WIM)\$($F_WIM_CUSTOM).esd.7z"
+    } elseif ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM)" -PathType "Leaf" ) {
+      New-7z -App "$($D_APP)\7z\7za.exe" -In "$($D_WIM)\$($F_WIM_CUSTOM)" -Out "$($D_WIM)\$($F_WIM_CUSTOM).7z"
     } else {
-      Write-Host "Not Found: '$($f_wim_custom)' or '$($f_wim_custom).esd'."
+      Write-Host "Not Found: '$($F_WIM_CUSTOM)' or '$($F_WIM_CUSTOM).esd'."
     }
-    Start-Sleep -s $sleep
+    Start-Sleep -s $SLEEP
 
   }
 

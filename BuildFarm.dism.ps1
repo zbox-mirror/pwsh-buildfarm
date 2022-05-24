@@ -84,13 +84,13 @@ function Start-BuildImage() {
   Import-BFModule_DISM
 
   # Check directories.
-  if ( ! ( Test-Path "$($D_APP)" ) ) { New-Item -Path "$($D_APP)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($D_DRV)" ) ) { New-Item -Path "$($D_DRV)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($D_LOG)" ) ) { New-Item -Path "$($D_LOG)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($D_MNT)" ) ) { New-Item -Path "$($D_MNT)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($D_TMP)" ) ) { New-Item -Path "$($D_TMP)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($D_UPD)" ) ) { New-Item -Path "$($D_UPD)" -ItemType "Directory" }
-  if ( ! ( Test-Path "$($D_WIM)" ) ) { New-Item -Path "$($D_WIM)" -ItemType "Directory" }
+  if ( -not ( Test-Path "$($D_APP)" ) ) { New-Item -Path "$($D_APP)" -ItemType "Directory" }
+  if ( -not ( Test-Path "$($D_DRV)" ) ) { New-Item -Path "$($D_DRV)" -ItemType "Directory" }
+  if ( -not ( Test-Path "$($D_LOG)" ) ) { New-Item -Path "$($D_LOG)" -ItemType "Directory" }
+  if ( -not ( Test-Path "$($D_MNT)" ) ) { New-Item -Path "$($D_MNT)" -ItemType "Directory" }
+  if ( -not ( Test-Path "$($D_TMP)" ) ) { New-Item -Path "$($D_TMP)" -ItemType "Directory" }
+  if ( -not ( Test-Path "$($D_UPD)" ) ) { New-Item -Path "$($D_UPD)" -ItemType "Directory" }
+  if ( -not ( Test-Path "$($D_WIM)" ) ) { New-Item -Path "$($D_WIM)" -ItemType "Directory" }
 
   # Start build log.
   Start-Transcript -Path "$($D_LOG)\wim.build.$($TS).log"
@@ -98,10 +98,10 @@ function Start-BuildImage() {
   while ( $true ) {
 
     # Check WIM file exist.
-    if ( ! ( Test-Path -Path "$($D_WIM)\$($F_WIM_ORIGINAL)" -PathType "Leaf" ) ) { break }
+    if ( -not ( Test-Path -Path "$($D_WIM)\$($F_WIM_ORIGINAL)" -PathType "Leaf" ) ) { break }
 
     # Get Windows image hash.
-    if ( ! $NoWimHash ) {
+    if ( -not $NoWimHash ) {
       Get-BFImageHash
     }
 
@@ -109,12 +109,12 @@ function Start-BuildImage() {
     Write-BFMsg -Title -Message "--- Get Windows Image Info..."
     Dism /Get-ImageInfo /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /ScratchDir:"$($D_TMP)"
     [int]$WIM_INDEX = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
-    if ( ! $WIM_INDEX ) { break }
+    if ( -not $WIM_INDEX ) { break }
 
     # Mount Windows image.
     Mount-BFImage
 
-    if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
+    if ( ( $AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
       Add-BFPackages
 
@@ -123,7 +123,7 @@ function Start-BuildImage() {
     }
 
     # Add drivers.
-    if ( ( $AddDrivers ) -and ( ! ( Get-ChildItem "$($D_DRV)" | Measure-Object ).Count -eq 0 ) ) {
+    if ( ( $AddDrivers ) -and ( -not ( Get-ChildItem "$($D_DRV)" | Measure-Object ).Count -eq 0 ) ) {
       Add-BFDrivers
     }
 
@@ -173,7 +173,7 @@ function Import-BFModule_DISM() {
   Write-BFMsg -Title -Message "--- Import Modules..."
   $DismModuleName = "Dism"
   $Env:Path = "$($DismPath)"
-  if ( ! ( Get-Module -Name "$($DismModuleName)" ) ) {
+  if ( -not ( Get-Module -Name $DismModuleName ) ) {
     Import-Module "$($DismPath)"
   } else {
     Remove-Module -Name "$($DismModuleName)"

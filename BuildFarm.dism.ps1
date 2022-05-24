@@ -110,68 +110,68 @@ function Start-BuildImage() {
 
     # Get Windows image info.
     Write-BFMsg -Title -Message "--- Get Windows Image Info..."
-    dism /Get-ImageInfo /ImageFile:"$($d_wim)\$($f_wim_original)" /ScratchDir:"$($d_tmp)"
+    Dism /Get-ImageInfo /ImageFile:"$($d_wim)\$($f_wim_original)" /ScratchDir:"$($d_tmp)"
     [int]$wim_index = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
     if ( ! $wim_index ) { break }
 
     # Mount Windows image.
     Write-BFMsg -Title -Message "--- Mount Windows Image..."
-    dism /Mount-Image /ImageFile:"$($d_wim)\$($f_wim_original)" /MountDir:"$($d_mnt)" /Index:$wim_index /CheckIntegrity /ScratchDir:"$($d_tmp)"
+    Dism /Mount-Image /ImageFile:"$($d_wim)\$($f_wim_original)" /MountDir:"$($d_mnt)" /Index:$wim_index /CheckIntegrity /ScratchDir:"$($d_tmp)"
     Start-Sleep -s $sleep
 
     if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($d_upd)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
       Write-BFMsg -Title -Message "--- Add Windows Packages..."
-      dism /Image:"$($d_mnt)" /Add-Package /PackagePath "$($d_upd)" /IgnoreCheck /ScratchDir:"$($d_tmp)"
+      Dism /Image:"$($d_mnt)" /Add-Package /PackagePath "$($d_upd)" /IgnoreCheck /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
 
       # Get packages.
       Write-BFMsg -Title -Message "--- Get Windows Packages..."
-      dism /Image:"$($d_mnt)" /Get-Packages /ScratchDir:"$($d_tmp)"
+      Dism /Image:"$($d_mnt)" /Get-Packages /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Add drivers.
     if ( ( $AddDrivers ) -and ( ! ( Get-ChildItem "$($d_drv)" | Measure-Object ).Count -eq 0 ) ) {
       Write-BFMsg -Title -Message "--- Add Windows Drivers..."
-      dism /Image:"$($d_mnt)" /Add-Driver "$($d_drv)" /Recurse /ScratchDir:"$($d_tmp)"
+      Dism /Image:"$($d_mnt)" /Add-Driver "$($d_drv)" /Recurse /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Reset Windows image.
     if ( $ResetBase ) {
       Write-BFMsg -Title -Message "--- Reset Windows Image..."
-      dism /Image:"$($d_mnt)" /Cleanup-Image /StartComponentCleanup /ResetBase /ScratchDir:"$($d_tmp)"
+      Dism /Image:"$($d_mnt)" /Cleanup-Image /StartComponentCleanup /ResetBase /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Scan health Windows image.
     if ( $ScanHealth ) {
       Write-BFMsg -Title -Message "--- Scan Health Windows Image..."
-      dism /Image:"$($d_mnt)" /Cleanup-Image /ScanHealth /ScratchDir:"$($d_tmp)"
+      Dism /Image:"$($d_mnt)" /Cleanup-Image /ScanHealth /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Dismount Windows image.
     if ( $SaveImage ) {
       Write-BFMsg -Title -Message "--- Save & Dismount Windows Image..."
-      dism /Unmount-Image /MountDir:"$($d_mnt)" /Commit /ScratchDir:"$($d_tmp)"
+      Dism /Unmount-Image /MountDir:"$($d_mnt)" /Commit /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     } else {
       Write-BFMsg -Title -Message "--- Discard & Dismount Windows Image..."
-      dism /Unmount-Image /MountDir:"$($d_mnt)" /Discard /ScratchDir:"$($d_tmp)"
+      Dism /Unmount-Image /MountDir:"$($d_mnt)" /Discard /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     if ( $ExportToESD ) {
       # Export Windows image to custom ESD format.
       Write-BFMsg -Title -Message "--- Export Windows Image to Custom ESD Format..."
-      dism /Export-Image /SourceImageFile:"$($d_wim)\$($f_wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($f_wim_custom).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
+      Dism /Export-Image /SourceImageFile:"$($d_wim)\$($f_wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($f_wim_custom).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     } else {
       # Export Windows image to custom WIM format.
       Write-BFMsg -Title -Message "--- Export Windows Image to Custom WIM Format..."
-      dism /Export-Image /SourceImageFile:"$($d_wim)\$($f_wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($f_wim_custom)" /Compress:max /CheckIntegrity /ScratchDir:"$($d_tmp)"
+      Dism /Export-Image /SourceImageFile:"$($d_wim)\$($f_wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($f_wim_custom)" /Compress:max /CheckIntegrity /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 

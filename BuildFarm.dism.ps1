@@ -102,56 +102,56 @@ function Start-BuildImage() {
 
     # Get Windows image info.
     Write-BFMsg -Title -Message "--- Get Windows Image Info..."
-    Get-WindowsImage -ImagePath "$($d_wim)\$($f_wim_original)" -ScratchDirectory "$($d_tmp)"
+    dism /Get-ImageInfo /ImageFile:"$($d_wim)\$($f_wim_original)" /ScratchDir:"$($d_tmp)"
     [int]$wim_index = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
     if ( ! $wim_index ) { break }
 
     # Mount Windows image.
     Write-BFMsg -Title -Message "--- Mount Windows Image..."
-    Mount-WindowsImage -ImagePath "$($d_wim)\$($f_wim_original)" -Path "$($d_mnt)" -Index $wim_index -CheckIntegrity -ScratchDirectory "$($d_tmp)"
+    dism /Mount-Image /ImageFile:"$($d_wim)\$($f_wim_original)" /MountDir:"$($d_mnt)" /Index:$wim_index /CheckIntegrity /ScratchDir:"$($d_tmp)"
     Start-Sleep -s $sleep
 
     if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($d_upd)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
       Write-BFMsg -Title -Message "--- Add Windows Packages..."
-      Add-WindowsPackage -Path "$($d_mnt)" -PackagePath "$($d_upd)" -IgnoreCheck -ScratchDirectory "$($d_tmp)"
+      dism /Image:"$($d_mnt)" /Add-Package /PackagePath "$($d_upd)" /IgnoreCheck /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
 
       # Get packages.
       Write-BFMsg -Title -Message "--- Get Windows Packages..."
-      Get-WindowsPackage -Path "$($d_mnt)" -ScratchDirectory "$($d_tmp)"
+      dism /Image:"$($d_mnt)" /Get-Packages /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Add drivers.
     if ( ( $AddDrivers ) -and ( ! ( Get-ChildItem "$($d_drv)" | Measure-Object ).Count -eq 0 ) ) {
       Write-BFMsg -Title -Message "--- Add Windows Drivers..."
-      Add-WindowsDriver -Path "$($d_mnt)" -Driver "$($d_drv)" -Recurse -ScratchDirectory "$($d_tmp)"
+      dism /Image:"$($d_mnt)" /Add-Driver "$($d_drv)" /Recurse /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Reset Windows image.
     if ( $ResetBase ) {
       Write-BFMsg -Title -Message "--- Reset Windows Image..."
-      Repair-WindowsImage -Path "$($d_mnt)" -StartComponentCleanup -ResetBase -ScratchDirectory "$($d_tmp)"
+      dism /Image:"$($d_mnt)" /Cleanup-Image /StartComponentCleanup /ResetBase /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Scan health Windows image.
     if ( $ScanHealth ) {
       Write-BFMsg -Title -Message "--- Scan Health Windows Image..."
-      Repair-WindowsImage -Path "$($d_mnt)" -ScanHealth -ScratchDirectory "$($d_tmp)"
+      dism /Image:"$($d_mnt)" /Cleanup-Image /ScanHealth /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
     # Dismount Windows image.
     if ( $SaveImage ) {
       Write-BFMsg -Title -Message "--- Save & Dismount Windows Image..."
-      Dismount-WindowsImage -Path "$($d_mnt)" -Save -ScratchDirectory "$($d_tmp)"
+      dism /Unmount-Image /MountDir:"$($d_mnt)" /Commit /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     } else {
       Write-BFMsg -Title -Message "--- Discard & Dismount Windows Image..."
-      Dismount-WindowsImage -Path "$($d_mnt)" -Discard -ScratchDirectory "$($d_tmp)"
+      dism /Unmount-Image /MountDir:"$($d_mnt)" /Discard /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 
@@ -163,7 +163,7 @@ function Start-BuildImage() {
     } else {
       # Export Windows image to custom WIM format.
       Write-BFMsg -Title -Message "--- Export Windows Image to Custom WIM Format..."
-      Export-WindowsImage -SourceImagePath "$($d_wim)\$($f_wim_original)" -SourceIndex $wim_index -DestinationImagePath "$($d_wim)\$($f_wim_custom)" -CompressionType "max" -CheckIntegrity -ScratchDirectory "$($d_tmp)"
+      dism /Export-Image /SourceImageFile:"$($d_wim)\$($f_wim_original)" /SourceIndex:$wim_index /DestinationImageFile:"$($d_wim)\$($f_wim_custom)" /Compress:max /CheckIntegrity /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 

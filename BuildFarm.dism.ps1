@@ -76,6 +76,11 @@ function Start-BuildFarm() {
 # -------------------------------------------------------------------------------------------------------------------- #
 
 function Start-BuildImage() {
+  # Get new DISM.
+  $d_dism = "$($d_app)\ADK\Assessment and Deployment Kit\Deployment Tools\amd64\DISM"
+  $env:Path = "$($d_dism)"
+  Import-Module "$($d_dism)"
+
   # Check directories.
   if ( ! ( Test-Path "$($d_app)" ) ) { New-Item -Path "$($d_app)" -ItemType "Directory" }
   if ( ! ( Test-Path "$($d_drv)" ) ) { New-Item -Path "$($d_drv)" -ItemType "Directory" }

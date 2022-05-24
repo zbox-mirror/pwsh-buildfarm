@@ -82,7 +82,9 @@ function Start-BuildFarm() {
 function Start-BuildImage() {
   # Get new DISM.
   $env:Path = "$($DismPath)"
-  Import-Module "$($DismPath)"
+  if ( ! ( Get-Module -ListAvailable -Name "DISM" ) ) {
+    Import-Module "$($DismPath)"
+  }
 
   # Check directories.
   if ( ! ( Test-Path "$($d_app)" ) ) { New-Item -Path "$($d_app)" -ItemType "Directory" }

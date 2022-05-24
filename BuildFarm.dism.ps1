@@ -176,7 +176,7 @@ function Import-BFModule_DISM() {
   if ( -not ( Get-Module -Name $DismModuleName ) ) {
     Import-Module "$($DismPath)"
   } else {
-    Remove-Module -Name "$($DismModuleName)"
+    Remove-Module -Name $($DismModuleName)
     Import-Module "$($DismPath)"
   }
 

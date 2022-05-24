@@ -171,7 +171,7 @@ function Import-BFModule_DISM() {
   Get-Module
 
   Write-BFMsg -Title -Message "--- Import Modules..."
-  $DismModuleName = "DISM"
+  $DismModuleName = "Dism"
   $Env:Path = "$($DismPath)"
   if ( ! ( Get-Module -Name "$($DismModuleName)" ) ) {
     Import-Module "$($DismPath)"

@@ -81,12 +81,13 @@ function Start-BuildFarm() {
 
 function Start-BuildImage() {
   # Get new DISM.
-  $env:Path = "$($DismPath)"
+  $DismModuleName = "DISM"
+  $Env:Path = "$($DismPath)"
 
-  if ( ! ( Get-Module -Name "DISM" ) ) {
+  if ( ! ( Get-Module -Name "$($DismModuleName)" ) ) {
     Import-Module "$($DismPath)"
   } else {
-    Remove-Module -Name "DISM"
+    Remove-Module -Name "$($DismModuleName)"
     Import-Module "$($DismPath)"
   }
 

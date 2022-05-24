@@ -10,6 +10,10 @@
 #Requires -RunAsAdministrator
 
 Param(
+  [Parameter(HelpMessage="Enter DISM path.")]
+  [Alias("DP")]
+  [string]$DismPath = "$($PSScriptRoot)\Apps\ADK\Assessment and Deployment Kit\Deployment Tools\amd64\DISM",
+
   [Parameter(HelpMessage="Enter WIM language.")]
   [Alias("WL")]
   [string]$WimLanguage = "en-us",
@@ -77,9 +81,8 @@ function Start-BuildFarm() {
 
 function Start-BuildImage() {
   # Get new DISM.
-  $d_dism = "$($d_app)\ADK\Assessment and Deployment Kit\Deployment Tools\amd64\DISM"
-  $env:Path = "$($d_dism)"
-  Import-Module "$($d_dism)"
+  $env:Path = "$($DismPath)"
+  Import-Module "$($DismPath)"
 
   # Check directories.
   if ( ! ( Test-Path "$($d_app)" ) ) { New-Item -Path "$($d_app)" -ItemType "Directory" }

@@ -122,7 +122,7 @@ function Start-BuildImage() {
     if ( ( $AddPackages ) -and ( ! ( Get-ChildItem "$($d_upd)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
       Write-BFMsg -Title -Message "--- Add Windows Packages..."
-      Dism /Image:"$($d_mnt)" /Add-Package /PackagePath "$($d_upd)" /IgnoreCheck /ScratchDir:"$($d_tmp)"
+      Dism /Image:"$($d_mnt)" /Add-Package /PackagePath:"$($d_upd)" /IgnoreCheck /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
 
       # Get packages.
@@ -134,7 +134,7 @@ function Start-BuildImage() {
     # Add drivers.
     if ( ( $AddDrivers ) -and ( ! ( Get-ChildItem "$($d_drv)" | Measure-Object ).Count -eq 0 ) ) {
       Write-BFMsg -Title -Message "--- Add Windows Drivers..."
-      Dism /Image:"$($d_mnt)" /Add-Driver "$($d_drv)" /Recurse /ScratchDir:"$($d_tmp)"
+      Dism /Image:"$($d_mnt)" /Add-Driver /Driver:"$($d_drv)" /Recurse /ScratchDir:"$($d_tmp)"
       Start-Sleep -s $sleep
     }
 

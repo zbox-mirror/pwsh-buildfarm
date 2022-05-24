@@ -166,22 +166,9 @@ function Start-BuildImage() {
 # -------------------------------------------------------------------------------------------------------------------- #
 
 function Import-BFModule_DISM() {
-  # Get new DISM.
-  Write-BFMsg -Title -Message "--- Get Modules..."
-  Get-Module
-
-  Write-BFMsg -Title -Message "--- Import Modules..."
-  $DismModuleName = "Dism"
+  Write-BFMsg -Title -Message "--- Import DISM Module..."
   $Env:Path = "$($DismPath)"
-  if ( -not ( Get-Module -Name "$($DismModuleName)" ) ) {
-    Import-Module "$($DismPath)"
-  } else {
-    Remove-Module -Name "$($DismModuleName)"
-    Import-Module "$($DismPath)"
-  }
-
-  Write-BFMsg -Title -Message "--- Check Modules..."
-  Get-Module
+  Import-Module "$($DismPath)"
 }
 
 function Get-BFImageHash() {

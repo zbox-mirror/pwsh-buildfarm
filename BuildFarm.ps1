@@ -65,7 +65,7 @@ function Start-BuildFarm() {
   $f_wim_custom = "$($WimLanguage)\install.custom.$($ts).wim"
 
   # Sleep time.
-  [int]$sleep = 5
+  [int]$sleep = 10
 
   # Run.
   Start-BuildImage

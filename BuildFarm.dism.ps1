@@ -167,6 +167,9 @@ function Start-BuildImage() {
 
 function Import-BFModule_DISM() {
   Write-BFMsg -Title -Message "--- Import DISM Module..."
+  if ( Get-Module -Name "Dism" ) {
+    Write-Warning "DISM module is already loaded in this session. Please restart your PowerShell session." -WarningAction Stop
+  }
   $Env:Path = "$($DismPath)"
   Import-Module "$($DismPath)"
 }

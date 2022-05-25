@@ -243,9 +243,9 @@ function Export-BFImage_WIM() {
 function Compress-BFImage() {
   Write-BFMsg -Title -Message "--- Create Windows Image Archive..."
   if ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM).esd" -PathType "Leaf" ) {
-    New-7z -App "$($D_APP)\7z\7za.exe" -In "$($D_WIM)\$($F_WIM_CUSTOM).esd" -Out "$($D_WIM)\$($F_WIM_CUSTOM).esd.7z"
+    Compress-7z -App "$($D_APP)\7z\7za.exe" -In "$($D_WIM)\$($F_WIM_CUSTOM).esd" -Out "$($D_WIM)\$($F_WIM_CUSTOM).esd.7z"
   } elseif ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM)" -PathType "Leaf" ) {
-    New-7z -App "$($D_APP)\7z\7za.exe" -In "$($D_WIM)\$($F_WIM_CUSTOM)" -Out "$($D_WIM)\$($F_WIM_CUSTOM).7z"
+    Compress-7z -App "$($D_APP)\7z\7za.exe" -In "$($D_WIM)\$($F_WIM_CUSTOM)" -Out "$($D_WIM)\$($F_WIM_CUSTOM).7z"
   } else {
     Write-Host "Not Found: '$($F_WIM_CUSTOM)' or '$($F_WIM_CUSTOM).esd'."
   }
@@ -264,7 +264,7 @@ function Write-BFMsg() {
   }
 }
 
-function New-7z() {
+function Compress-7z() {
   param (
     [string]$App,
     [string]$In,

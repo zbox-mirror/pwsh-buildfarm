@@ -260,6 +260,7 @@ function Write-BFMsg() {
     [string]$Message,
     [switch]$Title = $false
   )
+
   if ( $Title ) {
     Write-Host "$($Message)" -ForegroundColor Blue
   } else {
@@ -273,6 +274,7 @@ function Compress-7z() {
     [string]$In,
     [string]$Out
   )
+
   $7zParams = "a", "-t7z", "$($Out)", "$($In)"
   & "$($App)" @7zParams
 }

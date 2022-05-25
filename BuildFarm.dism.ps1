@@ -108,6 +108,7 @@ function Start-BuildImage() {
 
     # Get Windows image info.
     Write-BFMsg -Title -Message "$($NL)--- Get Windows Image Info..."
+
     Dism /Get-ImageInfo /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /ScratchDir:"$($D_TMP)"
     [int]$WIM_INDEX = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
     if ( -not $WIM_INDEX ) { break }

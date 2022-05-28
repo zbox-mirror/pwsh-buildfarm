@@ -170,6 +170,10 @@ function Import-BFModule_DISM() {
     Write-Warning "DISM module is already loaded in this session. Please restart your PowerShell session." -WarningAction Stop
   }
 
+  if ( -not ( Test-Path -Path "$($DismPath)\dism.exe" -PathType "Leaf" ) ) {
+    Write-Warning "DISM in '$($DismPath)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'." -WarningAction Stop
+  }
+
   $Env:Path = "$($DismPath)"
   Import-Module "$($DismPath)"
 }

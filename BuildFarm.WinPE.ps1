@@ -10,13 +10,18 @@
 #Requires -RunAsAdministrator
 
 Param(
-  [Parameter(HelpMessage="Enter DISM path.")]
-  [Alias("DP")]
-  [string]$DismPath = "$($PSScriptRoot)\Apps\ADK\Assessment and Deployment Kit\Deployment Tools\amd64\DISM",
+  [Parameter(HelpMessage="Enter ADK path.")]
+  [Alias("ADKP")]
+  [string]$ADKPath = "$($PSScriptRoot)\Apps\ADK",
 
   [Parameter(HelpMessage="Enter WIM language.")]
   [Alias("WL")]
   [string]$WimLanguage = "en-us",
+
+  [Parameter(HelpMessage="")]
+  [ValidateSet("amd64", "x86", "arm64")]
+  [Alias("ARCH")]
+  [string]$Arch = "amd64",
 
   [Parameter(HelpMessage="Disable hash value for a WIM file.")]
   [Alias("NoWH")]
@@ -34,17 +39,9 @@ Param(
   [Alias("RB")]
   [switch]$ResetBase = $false,
 
-  [Parameter(HelpMessage="Scans the image for component store corruption. This operation will take several minutes.")]
-  [Alias("SH")]
-  [switch]$ScanHealth = $false,
-
   [Parameter(HelpMessage="Saves the changes to a Windows image.")]
   [Alias("SI")]
   [switch]$SaveImage = $false,
-
-  [Parameter(HelpMessage="Export WIM to ESD format.")]
-  [Alias("ESD")]
-  [switch]$ExportToESD = $false
 )
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -65,8 +62,8 @@ function Start-BuildFarm() {
   $TS = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
 
   # WIM path.
-  $F_WIM_ORIGINAL = "$($WimLanguage)\install.wim"
-  $F_WIM_CUSTOM = "$($WimLanguage)\install.custom.$($TS).wim"
+  $F_WIM_ORIGINAL = "$($WimLanguage)\boot.wim"
+  $F_WIM_CUSTOM = "$($WimLanguage)\boot.custom.$($TS).wim"
 
   # Sleep time.
   [int]$SLEEP = 10
@@ -132,9 +129,6 @@ function Start-BuildImage() {
     # Reset Windows image.
     if ( $ResetBase ) { Start-BFResetBase }
 
-    # Scan health Windows image.
-    if ( $ScanHealth ) { Start-BFScanHealth }
-
     # Dismount Windows image.
     if ( $SaveImage ) {
       Dismount-BFImage_Commit
@@ -142,13 +136,8 @@ function Start-BuildImage() {
       Dismount-BFImage_Discard
     }
 
-    if ( $ExportToESD ) {
-      # Export Windows image to custom ESD format.
-      Export-BFImage_ESD
-    } else {
-      # Export Windows image to custom WIM format.
-      Export-BFImage_WIM
-    }
+    # Export Windows image to custom WIM format.
+    Export-BFImage_WIM
 
     # Create Windows image archive.
     Compress-BFImage
@@ -165,6 +154,8 @@ function Start-BuildImage() {
 
 function Import-BFModule_DISM() {
   Write-BFMsg -Title -Message "--- Import DISM Module..."
+
+  $DismPath = "$($ADKPath)\Assessment and Deployment Kit\Deployment Tools\$($Arch)\DISM"
 
   if ( Get-Module -Name "Dism" ) {
     Write-Warning "DISM module is already loaded in this session. Please restart your PowerShell session." -WarningAction Stop
@@ -189,6 +180,14 @@ function Mount-BFImage() {
   Write-BFMsg -Title -Message "--- Mount Windows Image..."
 
   Dism /Mount-Image /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /MountDir:"$($D_MNT)" /Index:$WIM_INDEX /CheckIntegrity /ScratchDir:"$($D_TMP)"
+  Start-Sleep -s $SLEEP
+}
+
+function Add-BFPackages() {
+  Write-BFMsg -Title -Message "--- Add Windows Packages..."
+
+  Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-WMI.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-WMI_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-NetFX.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-NetFX_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-Scripting.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-Scripting_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-PowerShell.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-PowerShell_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-StorageWMI.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-StorageWMI_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-DismCmdlets.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-DismCmdlets_en-us.cab" /ScratchDir:"$($D_TMP)"
+  Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-FMAPI.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-Dot3Svc.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-Dot3Svc_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-PPPoE.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-PPPoE_en-us.cab" /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
@@ -220,13 +219,6 @@ function Start-BFResetBase() {
   Start-Sleep -s $SLEEP
 }
 
-function Start-BFScanHealth() {
-  Write-BFMsg -Title -Message "--- Scan Health Windows Image..."
-
-  Dism /Image:"$($D_MNT)" /Cleanup-Image /ScanHealth /ScratchDir:"$($D_TMP)"
-  Start-Sleep -s $SLEEP
-}
-
 function Dismount-BFImage_Commit() {
   Write-BFMsg -Title -Message "--- Save & Dismount Windows Image..."
 
@@ -238,13 +230,6 @@ function Dismount-BFImage_Discard() {
   Write-BFMsg -Title -Message "--- Discard & Dismount Windows Image..."
 
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Discard /ScratchDir:"$($D_TMP)"
-  Start-Sleep -s $SLEEP
-}
-
-function Export-BFImage_ESD() {
-  Write-BFMsg -Title -Message "--- Export Windows Image to Custom ESD Format..."
-
-  Dism /Export-Image /SourceImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /SourceIndex:$WIM_INDEX /DestinationImageFile:"$($D_WIM)\$($F_WIM_CUSTOM).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 

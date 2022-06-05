@@ -39,6 +39,10 @@ Param(
   [Alias("AD")]
   [switch]$P_AddDrivers = $false,
 
+  [Parameter(HelpMessage="Add apps to offline Windows image.")]
+  [Alias("AA")]
+  [switch]$P_AddApps = $false,
+
   [Parameter(HelpMessage="Reset base of superseded components to further reduce component store size.")]
   [Alias("RB")]
   [switch]$P_ResetBase = $false,
@@ -57,11 +61,7 @@ Param(
 
   [Parameter(HelpMessage="Add single .cab or .msu file to offline Windows image from Windows ADK.")]
   [Alias("WPE_AP")]
-  [switch]$P_WinPE_AddPackages = $false,
-
-  [Parameter(HelpMessage="Add apps to offline Windows image.")]
-  [Alias("WPE_AA")]
-  [switch]$P_WinPE_AddApps = $false
+  [switch]$P_WinPE_AddPackages = $false
 )
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -131,7 +131,7 @@ function Start-BuildImage() {
     Mount-BFImage
 
     # Add ADK WinPE packages.
-    if ( ( $P_WinPE_AddPackages ) -and ( $P_Name -eq "boot" ) ) { Add-BFPackages_ADK_WinPE }
+    if ( ( $P_WinPE_AddPackages ) -and ( $P_Name -eq "boot" ) ) { Add-BFPackages_WinPE }
 
     if ( ( $P_AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
@@ -144,6 +144,11 @@ function Start-BuildImage() {
     # Add drivers.
     if ( ( $P_AddDrivers ) -and ( -not ( Get-ChildItem "$($D_DRV)" | Measure-Object ).Count -eq 0 ) ) {
       Add-BFDrivers
+    }
+
+    # Add drivers.
+    if ( ( $P_AddApps ) -and ( -not ( Get-ChildItem "$($D_APP)" | Measure-Object ).Count -eq 0 ) ) {
+      Add-BFApps
     }
 
     # Reset Windows image.
@@ -229,16 +234,16 @@ function Mount-BFImage() {
   Start-Sleep -s $SLEEP
 }
 
-function Add-BFPackages_ADK_WinPE() {
+function Add-BFPackages_WinPE() {
   Write-BFMsg -T -M "--- Add ADK WinPE Packages..."
 
-  $D_WinPE = "$($P_ADK)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPU)\WinPE_OCs"
+  $D_WPE = "$($P_ADK)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPU)\WinPE_OCs"
 
-  if ( -not ( Test-Path -Path "$($D_WinPE)" ) ) {
-    Write-Warning "WinPE in '$($D_WinPE)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop
+  if ( -not ( Test-Path -Path "$($D_WPE)" ) ) {
+    Write-Warning "WinPE in '$($D_WPE)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop
   }
 
-  $WinPE_Pkgs = @(
+  $PKGs = @(
     "WinPE-WMI"
     "WinPE-NetFX"
     "WinPE-Scripting"
@@ -250,10 +255,10 @@ function Add-BFPackages_ADK_WinPE() {
     "WinPE-PPPoE"
   )
 
-  foreach ($WinPE_Pkg in $WinPE_Pkgs) {
-    Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_WinPE)\$($WinPE_Pkg).cab" /ScratchDir:"$($D_TMP)"
-    if ( Test-Path -Path "$($D_WinPE)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" -PathType "Leaf" ) {
-      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_WinPE)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"
+  foreach ($PKG in $PKGs) {
+    Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_WPE)\$($PKG).cab" /ScratchDir:"$($D_TMP)"
+    if ( Test-Path -Path "$($D_WPE)\$($P_Language)\$($PKG)_$($P_Language).cab" -PathType "Leaf" ) {
+      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_WPE)\$($P_Language)\$($PKG)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"
     }
   }
 
@@ -279,6 +284,15 @@ function Add-BFDrivers() {
 
   Dism /Image:"$($D_MNT)" /Add-Driver /Driver:"$($D_DRV)" /Recurse /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
+}
+
+function Add-BFApps() {
+  Write-BFMsg -T -M "--- Add Windows Apps..."
+
+  $Apps = Get-ChildItem -Path "$($D_APP)" -Filter "*.7z" -Recurse
+  foreach ( $App in $Apps ) {
+    Expand-7z -I "$($App.FullName)" -O "$($D_MNT)\Data\Apps"
+  }
 }
 
 function Start-BFResetBase() {
@@ -362,6 +376,18 @@ function Compress-7z() {
   )
 
   $7zParams = "a", "-t7z", "$($Out)", "$($In)"
+  & "$($PSScriptRoot)\_META\7z\7za.exe" @7zParams
+}
+
+function Expand-7z() {
+  param (
+    [Alias("I")]
+    [string]$In,
+    [Alias("O")]
+    [string]$Out
+  )
+
+  $7zParams = "x", "$($In)", "-o$($Out)", "-aoa"
   & "$($PSScriptRoot)\_META\7z\7za.exe" @7zParams
 }
 

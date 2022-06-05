@@ -10,41 +10,46 @@
 #Requires -RunAsAdministrator
 
 Param(
-  [Parameter(HelpMessage="Enter DISM path.")]
-  [Alias("DP")]
-  [string]$DismPath = "$($PSScriptRoot)\Apps\ADK\Assessment and Deployment Kit\Deployment Tools\amd64\DISM",
+  [Parameter(HelpMessage="Enter ADK path.")]
+  [Alias("ADK")]
+  [string]$P_ADKPath = "$($PSScriptRoot)\Apps\ADK",
+
+  [Parameter(HelpMessage="")]
+  [ValidateSet("amd64", "x86", "arm64")]
+  [Alias("CPU")]
+  [string]$P_CPUArch = "amd64",
 
   [Parameter(HelpMessage="Enter WIM language.")]
   [Alias("WL")]
-  [string]$WimLanguage = "en-us",
+  [string]$P_Language = "en-us",
 
   [Parameter(HelpMessage="Disable hash value for a WIM file.")]
   [Alias("NoWH")]
-  [switch]$NoWimHash = $false,
+  [switch]$P_NoWimHash = $false,
 
   [Parameter(HelpMessage="Adds a single .cab or .msu file to a Windows image.")]
   [Alias("AP")]
-  [switch]$AddPackages = $false,
+  [switch]$P_AddPackages = $false,
 
   [Parameter(HelpMessage="Adds a driver to an offline Windows image.")]
   [Alias("AD")]
-  [switch]$AddDrivers = $false,
+  [switch]$P_AddDrivers = $false,
 
   [Parameter(HelpMessage="Resets the base of superseded components to further reduce the component store size.")]
   [Alias("RB")]
-  [switch]$ResetBase = $false,
+  [switch]$P_ResetBase = $false,
 
   [Parameter(HelpMessage="Scans the image for component store corruption. This operation will take several minutes.")]
   [Alias("SH")]
-  [switch]$ScanHealth = $false,
+  [switch]$P_ScanHealth = $false,
 
   [Parameter(HelpMessage="Saves the changes to a Windows image.")]
   [Alias("SI")]
-  [switch]$SaveImage = $false,
+  [switch]$P_SaveImage = $false,
 
   [Parameter(HelpMessage="Export WIM to ESD format.")]
   [Alias("ESD")]
-  [switch]$ExportToESD = $false
+  [switch]$P_ExportToESD = $false
 )
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -65,8 +70,8 @@ function Start-BuildFarm() {
   $TS = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
 
   # WIM path.
-  $F_WIM_ORIGINAL = "$($WimLanguage)\install.wim"
-  $F_WIM_CUSTOM = "$($WimLanguage)\install.custom.$($TS).wim"
+  $F_WIM_ORIGINAL = "$($P_Language)\install.wim"
+  $F_WIM_CUSTOM = "$($P_Language)\install.custom.$($TS).wim"
 
   # Sleep time.
   [int]$SLEEP = 10
@@ -104,7 +109,7 @@ function Start-BuildImage() {
     if ( -not ( Test-Path -Path "$($D_WIM)\$($F_WIM_ORIGINAL)" -PathType "Leaf" ) ) { break }
 
     # Get Windows image hash.
-    if ( -not $NoWimHash ) { Get-BFImageHash }
+    if ( -not $P_NoWimHash ) { Get-BFImageHash }
 
     # Get Windows image info.
     Write-BFMsg -Title -Message "--- Get Windows Image Info..."
@@ -116,7 +121,7 @@ function Start-BuildImage() {
     # Mount Windows image.
     Mount-BFImage
 
-    if ( ( $AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
+    if ( ( $P_AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
       Add-BFPackages
 
@@ -125,24 +130,24 @@ function Start-BuildImage() {
     }
 
     # Add drivers.
-    if ( ( $AddDrivers ) -and ( -not ( Get-ChildItem "$($D_DRV)" | Measure-Object ).Count -eq 0 ) ) {
+    if ( ( $P_AddDrivers ) -and ( -not ( Get-ChildItem "$($D_DRV)" | Measure-Object ).Count -eq 0 ) ) {
       Add-BFDrivers
     }
 
     # Reset Windows image.
-    if ( $ResetBase ) { Start-BFResetBase }
+    if ( $P_ResetBase ) { Start-BFResetBase }
 
     # Scan health Windows image.
-    if ( $ScanHealth ) { Start-BFScanHealth }
+    if ( $P_ScanHealth ) { Start-BFScanHealth }
 
     # Dismount Windows image.
-    if ( $SaveImage ) {
+    if ( $P_SaveImage ) {
       Dismount-BFImage_Commit
     } else {
       Dismount-BFImage_Discard
     }
 
-    if ( $ExportToESD ) {
+    if ( $P_ExportToESD ) {
       # Export Windows image to custom ESD format.
       Export-BFImage_ESD
     } else {
@@ -166,16 +171,18 @@ function Start-BuildImage() {
 function Import-BFModule_DISM() {
   Write-BFMsg -Title -Message "--- Import DISM Module..."
 
+  $DISM_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Deployment Tools\$($P_CPUArch)\DISM"
+
   if ( Get-Module -Name "Dism" ) {
     Write-Warning "DISM module is already loaded in this session. Please restart your PowerShell session." -WarningAction Stop
   }
 
-  if ( -not ( Test-Path -Path "$($DismPath)\dism.exe" -PathType "Leaf" ) ) {
-    Write-Warning "DISM in '$($DismPath)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'." -WarningAction Stop
+  if ( -not ( Test-Path -Path "$($DISM_Path)\dism.exe" -PathType "Leaf" ) ) {
+    Write-Warning "DISM in '$($DISM_Path)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'." -WarningAction Stop
   }
 
-  $Env:Path = "$($DismPath)"
-  Import-Module "$($DismPath)"
+  $Env:Path = "$($DISM_Path)"
+  Import-Module "$($DISM_Path)"
 }
 
 function Get-BFImageHash() {
@@ -230,6 +237,7 @@ function Start-BFScanHealth() {
 function Dismount-BFImage_Commit() {
   Write-BFMsg -Title -Message "--- Save & Dismount Windows Image..."
 
+  Write-Warning "WIM file will be save and dismount. Make additional edits to image." -WarningAction Inquire
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Commit /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
@@ -237,6 +245,7 @@ function Dismount-BFImage_Commit() {
 function Dismount-BFImage_Discard() {
   Write-BFMsg -Title -Message "--- Discard & Dismount Windows Image..."
 
+  Write-Warning "WIM file will be discard and dismount. All changes will be lost." -WarningAction Inquire
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Discard /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }

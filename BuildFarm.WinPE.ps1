@@ -11,37 +11,37 @@
 
 Param(
   [Parameter(HelpMessage="Enter ADK path.")]
-  [Alias("ADKP")]
-  [string]$ADKPath = "$($PSScriptRoot)\Apps\ADK",
-
-  [Parameter(HelpMessage="Enter WIM language.")]
-  [Alias("WL")]
-  [string]$WimLanguage = "en-us",
+  [Alias("ADK")]
+  [string]$P_ADKPath = "$($PSScriptRoot)\Apps\ADK",
 
   [Parameter(HelpMessage="")]
   [ValidateSet("amd64", "x86", "arm64")]
-  [Alias("ARCH")]
-  [string]$Arch = "amd64",
+  [Alias("CPU")]
+  [string]$P_CPUArch = "amd64",
+
+  [Parameter(HelpMessage="Enter WIM language.")]
+  [Alias("WL")]
+  [string]$P_Language = "en-us",
 
   [Parameter(HelpMessage="Disable hash value for a WIM file.")]
   [Alias("NoWH")]
-  [switch]$NoWimHash = $false,
+  [switch]$P_NoWimHash = $false,
 
   [Parameter(HelpMessage="Adds a single .cab or .msu file to a Windows image.")]
   [Alias("AP")]
-  [switch]$AddPackages = $false,
+  [switch]$P_AddPackages = $false,
 
   [Parameter(HelpMessage="Adds a driver to an offline Windows image.")]
   [Alias("AD")]
-  [switch]$AddDrivers = $false,
+  [switch]$P_AddDrivers = $false,
 
   [Parameter(HelpMessage="Resets the base of superseded components to further reduce the component store size.")]
   [Alias("RB")]
-  [switch]$ResetBase = $false,
+  [switch]$P_ResetBase = $false,
 
   [Parameter(HelpMessage="Saves the changes to a Windows image.")]
   [Alias("SI")]
-  [switch]$SaveImage = $false,
+  [switch]$P_SaveImage = $false,
 )
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -62,8 +62,8 @@ function Start-BuildFarm() {
   $TS = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
 
   # WIM path.
-  $F_WIM_ORIGINAL = "$($WimLanguage)\boot.wim"
-  $F_WIM_CUSTOM = "$($WimLanguage)\boot.custom.$($TS).wim"
+  $F_WIM_ORIGINAL = "$($P_Language)\boot.wim"
+  $F_WIM_CUSTOM = "$($P_Language)\boot.custom.$($TS).wim"
 
   # Sleep time.
   [int]$SLEEP = 10
@@ -101,7 +101,7 @@ function Start-BuildImage() {
     if ( -not ( Test-Path -Path "$($D_WIM)\$($F_WIM_ORIGINAL)" -PathType "Leaf" ) ) { break }
 
     # Get Windows image hash.
-    if ( -not $NoWimHash ) { Get-BFImageHash }
+    if ( -not $P_NoWimHash ) { Get-BFImageHash }
 
     # Get Windows image info.
     Write-BFMsg -Title -Message "--- Get Windows Image Info..."
@@ -113,7 +113,10 @@ function Start-BuildImage() {
     # Mount Windows image.
     Mount-BFImage
 
-    if ( ( $AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
+    # Add ADK WinPE packages.
+    Add-BFPackages_ADK_WinPE
+
+    if ( ( $P_AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
       Add-BFPackages
 
@@ -122,15 +125,15 @@ function Start-BuildImage() {
     }
 
     # Add drivers.
-    if ( ( $AddDrivers ) -and ( -not ( Get-ChildItem "$($D_DRV)" | Measure-Object ).Count -eq 0 ) ) {
+    if ( ( $P_AddDrivers ) -and ( -not ( Get-ChildItem "$($D_DRV)" | Measure-Object ).Count -eq 0 ) ) {
       Add-BFDrivers
     }
 
     # Reset Windows image.
-    if ( $ResetBase ) { Start-BFResetBase }
+    if ( $P_ResetBase ) { Start-BFResetBase }
 
     # Dismount Windows image.
-    if ( $SaveImage ) {
+    if ( $P_SaveImage ) {
       Dismount-BFImage_Commit
     } else {
       Dismount-BFImage_Discard
@@ -155,18 +158,18 @@ function Start-BuildImage() {
 function Import-BFModule_DISM() {
   Write-BFMsg -Title -Message "--- Import DISM Module..."
 
-  $DismPath = "$($ADKPath)\Assessment and Deployment Kit\Deployment Tools\$($Arch)\DISM"
+  $DISM_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Deployment Tools\$($P_CPUArch)\DISM"
 
   if ( Get-Module -Name "Dism" ) {
     Write-Warning "DISM module is already loaded in this session. Please restart your PowerShell session." -WarningAction Stop
   }
 
-  if ( -not ( Test-Path -Path "$($DismPath)\dism.exe" -PathType "Leaf" ) ) {
-    Write-Warning "DISM in '$($DismPath)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'." -WarningAction Stop
+  if ( -not ( Test-Path -Path "$($DISM_Path)\dism.exe" -PathType "Leaf" ) ) {
+    Write-Warning "DISM in '$($DISM_Path)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'." -WarningAction Stop
   }
 
-  $Env:Path = "$($DismPath)"
-  Import-Module "$($DismPath)"
+  $Env:Path = "$($DISM_Path)"
+  Import-Module "$($DISM_Path)"
 }
 
 function Get-BFImageHash() {
@@ -183,11 +186,29 @@ function Mount-BFImage() {
   Start-Sleep -s $SLEEP
 }
 
-function Add-BFPackages() {
-  Write-BFMsg -Title -Message "--- Add Windows Packages..."
+function Add-BFPackages_ADK_WinPE() {
+  Write-BFMsg -Title -Message "--- Add ADK WinPE Packages..."
 
-  Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-WMI.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-WMI_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-NetFX.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-NetFX_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-Scripting.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-Scripting_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-PowerShell.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-PowerShell_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-StorageWMI.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-StorageWMI_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-DismCmdlets.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-DismCmdlets_en-us.cab" /ScratchDir:"$($D_TMP)"
-  Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-FMAPI.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-Dot3Svc.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-Dot3Svc_en-us.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\WinPE-PPPoE.cab" /PackagePath:"E:\BuildFarm\Windows.10\Apps\ADK\Assessment and Deployment Kit\Windows Preinstallation Environment\amd64\WinPE_OCs\en-us\WinPE-PPPoE_en-us.cab" /ScratchDir:"$($D_TMP)"
+  $WinPE_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPUArch)\WinPE_OCs"
+  $WinPE_Pkgs = @(
+    "WinPE-WMI"
+    "WinPE-NetFX"
+    "WinPE-Scripting"
+    "WinPE-PowerShell"
+    "WinPE-StorageWMI"
+    "WinPE-DismCmdlets"
+    "WinPE-FMAPI"
+    "WinPE-Dot3Svc"
+    "WinPE-PPPoE"
+  )
+
+  foreach ($ADK_WinPE_Pkg in $WinPE_Pkgs) {
+    Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($ADK_WinPE_Pkg).cab" /ScratchDir:"$($D_TMP)"
+    if ( Test-Path -Path "$($WinPE_Path)\$($P_Language)\$($ADK_WinPE_Pkg)_$($P_Language).cab" -PathType "Leaf" ) {
+      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($P_Language)\$($ADK_WinPE_Pkg)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"
+    }
+  }
+
   Start-Sleep -s $SLEEP
 }
 
@@ -222,6 +243,7 @@ function Start-BFResetBase() {
 function Dismount-BFImage_Commit() {
   Write-BFMsg -Title -Message "--- Save & Dismount Windows Image..."
 
+  Write-Warning "WIM file will be save and dismount. Make additional edits to image." -WarningAction Inquire
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Commit /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
@@ -229,6 +251,7 @@ function Dismount-BFImage_Commit() {
 function Dismount-BFImage_Discard() {
   Write-BFMsg -Title -Message "--- Discard & Dismount Windows Image..."
 
+  Write-Warning "WIM file will be discard and dismount. All changes will be lost." -WarningAction Inquire
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Discard /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }

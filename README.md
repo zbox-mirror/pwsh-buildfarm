@@ -14,8 +14,6 @@
   Язык системы, интегрированной в WIM. По умолчанию: `en-us`.
 - `-NoWH`  
   Отключение вычисления хэш-суммы для WIM.
-- `AP_ADK`  
-  Интеграция [дополнительных компонентов](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-adding-powershell-support-to-windows-pe) из ADK WinPE в образ `boot.wim`. *Только для образа WinPE.*
 - `-AP`  
   Добавление `.cab` или `.msu` файлов в WIM.
 - `-AD`  
@@ -28,6 +26,10 @@
   Сохранение изменений в WIM.
 - `-ESD`  
   Экспорт WIM файла в ESD формат.
+- `WPE_AP`  
+  Интеграция [дополнительных компонентов](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-adding-powershell-support-to-windows-pe) из ADK WinPE в образ `boot.wim`. *Только для образа WinPE.*
+- `WPE_AA`  
+  Интеграция приложений в образ `boot.wim`. *Только для образа WinPE.*
 
 ## Директории
 
@@ -73,7 +75,7 @@
 ### Работа с WinPE
 
 ```
-.\BuildFarm.ps1 -WN 'boot' -AP_ADK -RB -SI
+.\BuildFarm.ps1 -WN 'boot' -WPE_AP -RB -SI
 ```
 
 1. Подключить образ WIM под названием `boot`, что является **WinPE** (`-WN 'boot'`).

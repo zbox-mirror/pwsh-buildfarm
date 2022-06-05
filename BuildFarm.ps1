@@ -31,33 +31,37 @@ Param(
   [Alias("NoWH")]
   [switch]$P_NoWimHash = $false,
 
-  [Parameter(HelpMessage="Add ADK WinPE packages to WinPE image.")]
-  [Alias("AP_ADK")]
-  [switch]$P_AddPackages_ADK_WinPE = $false,
-
-  [Parameter(HelpMessage="Adds a single .cab or .msu file to a Windows image.")]
+  [Parameter(HelpMessage="Add .cab or .msu files to offline Windows image.")]
   [Alias("AP")]
   [switch]$P_AddPackages = $false,
 
-  [Parameter(HelpMessage="Adds a driver to an offline Windows image.")]
+  [Parameter(HelpMessage="Add drivers to offline Windows image.")]
   [Alias("AD")]
   [switch]$P_AddDrivers = $false,
 
-  [Parameter(HelpMessage="Resets the base of superseded components to further reduce the component store size.")]
+  [Parameter(HelpMessage="Reset base of superseded components to further reduce component store size.")]
   [Alias("RB")]
   [switch]$P_ResetBase = $false,
 
-  [Parameter(HelpMessage="Scans the image for component store corruption. This operation will take several minutes.")]
+  [Parameter(HelpMessage="Scan image for component store corruption. This operation will take several minutes.")]
   [Alias("SH")]
   [switch]$P_ScanHealth = $false,
 
-  [Parameter(HelpMessage="Saves the changes to a Windows image.")]
+  [Parameter(HelpMessage="Save changes to Windows image.")]
   [Alias("SI")]
   [switch]$P_SaveImage = $false,
 
   [Parameter(HelpMessage="Export WIM to ESD format.")]
   [Alias("ESD")]
-  [switch]$P_ExportToESD = $false
+  [switch]$P_ExportToESD = $false,
+
+  [Parameter(HelpMessage="Add single .cab or .msu file to offline Windows image from Windows ADK.")]
+  [Alias("WPE_AP")]
+  [switch]$P_WinPE_AddPackages = $false,
+
+  [Parameter(HelpMessage="Add apps to offline Windows image.")]
+  [Alias("WPE_AA")]
+  [switch]$P_WinPE_AddApps = $false
 )
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -127,7 +131,7 @@ function Start-BuildImage() {
     Mount-BFImage
 
     # Add ADK WinPE packages.
-    if ( ( $P_AddPackages_ADK_WinPE ) -and ( $P_Name -eq "boot" ) ) { Add-BFPackages_ADK_WinPE }
+    if ( ( $P_WinPE_AddPackages ) -and ( $P_Name -eq "boot" ) ) { Add-BFPackages_ADK_WinPE }
 
     if ( ( $P_AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
@@ -325,9 +329,9 @@ function Compress-BFImage() {
   Write-BFMsg -T -M "--- Create Windows Image Archive..."
 
   if ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM).esd" -PathType "Leaf" ) {
-    Compress-7z -A "$($D_APP)\7z\7za.exe" -I "$($D_WIM)\$($F_WIM_CUSTOM).esd" -O "$($D_WIM)\$($F_WIM_CUSTOM).esd.7z"
+    Compress-7z -I "$($D_WIM)\$($F_WIM_CUSTOM).esd" -O "$($D_WIM)\$($F_WIM_CUSTOM).esd.7z"
   } elseif ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM)" -PathType "Leaf" ) {
-    Compress-7z -A "$($D_APP)\7z\7za.exe" -I "$($D_WIM)\$($F_WIM_CUSTOM)" -O "$($D_WIM)\$($F_WIM_CUSTOM).7z"
+    Compress-7z -I "$($D_WIM)\$($F_WIM_CUSTOM)" -O "$($D_WIM)\$($F_WIM_CUSTOM).7z"
   } else {
     Write-Host "Not Found: '$($F_WIM_CUSTOM)' or '$($F_WIM_CUSTOM).esd'."
   }
@@ -351,8 +355,6 @@ function Write-BFMsg() {
 
 function Compress-7z() {
   param (
-    [Alias("A")]
-    [string]$App,
     [Alias("I")]
     [string]$In,
     [Alias("O")]
@@ -360,7 +362,7 @@ function Compress-7z() {
   )
 
   $7zParams = "a", "-t7z", "$($Out)", "$($In)"
-  & "$($App)" @7zParams
+  & "$($PSScriptRoot)\_META\7z\7za.exe" @7zParams
 }
 
 # -------------------------------------------------------------------------------------------------------------------- #

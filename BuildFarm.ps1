@@ -12,7 +12,7 @@
 Param(
   [Parameter(HelpMessage="ADK path.")]
   [Alias("ADK")]
-  [string]$P_ADK = "$($PSScriptRoot)\Apps\ADK",
+  [string]$P_ADK = "$($PSScriptRoot)\_META\ADK",
 
   [Parameter(HelpMessage="CPU architecture.")]
   [ValidateSet("x86", "amd64", "arm64")]

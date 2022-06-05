@@ -5,7 +5,7 @@
 ## Параметры
 
 - `-ADK`  
-  Путь к установленному [Windows ADK](https://docs.microsoft.com/en-us/windows-hardware/get-started/). По умолчанию: `$PSScriptRoot\Apps\ADK`.
+  Путь к установленному [Windows ADK](https://docs.microsoft.com/en-us/windows-hardware/get-started/). По умолчанию: `$PSScriptRoot\_META\ADK`.
 - `-CPU`  
   Архитектура образа WIM (`x86`, `amd64`, `arm64`). По умолчанию: `amd64`.
 - `-WN`  

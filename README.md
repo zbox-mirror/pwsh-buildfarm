@@ -15,7 +15,7 @@
 - `-NoWH`  
   Отключение вычисления хэш-суммы для WIM.
 - `AP_ADK`  
-  Интеграция дополнительных компонентов из ADK WinPE в образ `boot.wim`. *Только для образа WinPE.*
+  Интеграция [дополнительных компонентов](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-adding-powershell-support-to-windows-pe) из ADK WinPE в образ `boot.wim`. *Только для образа WinPE.*
 - `-AP`  
   Добавление `.cab` или `.msu` файлов в WIM.
 - `-AD`  

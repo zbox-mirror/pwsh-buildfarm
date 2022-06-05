@@ -203,7 +203,7 @@ function Add-BFPackages_ADK_WinPE() {
 
   $WinPE_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPUArch)\WinPE_OCs"
 
-  if ( -not ( Test-Path -Path "$($WinPE_Path)" -PathType "Leaf" ) ) {
+  if ( -not ( Test-Path -Path "$($WinPE_Path)" ) ) {
     Write-Warning "WinPE in '$($WinPE_Path)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop
   }
 

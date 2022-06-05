@@ -15,7 +15,7 @@ Param(
   [string]$P_ADKPath = "$($PSScriptRoot)\Apps\ADK",
 
   [Parameter(HelpMessage="CPU architecture.")]
-  [ValidateSet("amd64", "x86", "arm64")]
+  [ValidateSet("x86", "amd64", "arm64")]
   [Alias("CPU")]
   [string]$P_CPUArch = "amd64",
 
@@ -30,6 +30,10 @@ Param(
   [Parameter(HelpMessage="Disable hash value for a WIM file.")]
   [Alias("NoWH")]
   [switch]$P_NoWimHash = $false,
+
+  [Parameter(HelpMessage="Add ADK WinPE packages to WinPE image.")]
+  [Alias("AP_ADK")]
+  [switch]$P_AddPackages_ADK_WinPE = $false,
 
   [Parameter(HelpMessage="Adds a single .cab or .msu file to a Windows image.")]
   [Alias("AP")]
@@ -123,7 +127,7 @@ function Start-BuildImage() {
     Mount-BFImage
 
     # Add ADK WinPE packages.
-    if ( $P_Name -eq "boot" ) { Add-BFPackages_ADK_WinPE }
+    if ( ( $P_AddPackages_ADK_WinPE ) -and ( $P_Name -eq "boot" ) ) { Add-BFPackages_ADK_WinPE }
 
     if ( ( $P_AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.

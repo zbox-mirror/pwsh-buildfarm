@@ -190,6 +190,11 @@ function Add-BFPackages_ADK_WinPE() {
   Write-BFMsg -Title -Message "--- Add ADK WinPE Packages..."
 
   $WinPE_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPUArch)\WinPE_OCs"
+
+  if ( -not ( Test-Path -Path "$($WinPE_Path)" -PathType "Leaf" ) ) {
+    Write-Warning "WinPE in '$($WinPE_Path)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop
+  }
+
   $WinPE_Pkgs = @(
     "WinPE-WMI"
     "WinPE-NetFX"
@@ -202,10 +207,10 @@ function Add-BFPackages_ADK_WinPE() {
     "WinPE-PPPoE"
   )
 
-  foreach ($ADK_WinPE_Pkg in $WinPE_Pkgs) {
-    Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($ADK_WinPE_Pkg).cab" /ScratchDir:"$($D_TMP)"
-    if ( Test-Path -Path "$($WinPE_Path)\$($P_Language)\$($ADK_WinPE_Pkg)_$($P_Language).cab" -PathType "Leaf" ) {
-      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($P_Language)\$($ADK_WinPE_Pkg)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"
+  foreach ($WinPE_Pkg in $WinPE_Pkgs) {
+    Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($WinPE_Pkg).cab" /ScratchDir:"$($D_TMP)"
+    if ( Test-Path -Path "$($WinPE_Path)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" -PathType "Leaf" ) {
+      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"
     }
   }
 

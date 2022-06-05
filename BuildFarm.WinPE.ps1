@@ -10,16 +10,16 @@
 #Requires -RunAsAdministrator
 
 Param(
-  [Parameter(HelpMessage="Enter ADK path.")]
+  [Parameter(HelpMessage="ADK path.")]
   [Alias("ADK")]
   [string]$P_ADKPath = "$($PSScriptRoot)\Apps\ADK",
 
-  [Parameter(HelpMessage="")]
+  [Parameter(HelpMessage="CPU architecture.")]
   [ValidateSet("amd64", "x86", "arm64")]
   [Alias("CPU")]
   [string]$P_CPUArch = "amd64",
 
-  [Parameter(HelpMessage="Enter WIM language.")]
+  [Parameter(HelpMessage="WIM language.")]
   [Alias("WL")]
   [string]$P_Language = "en-us",
 

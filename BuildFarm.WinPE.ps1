@@ -80,14 +80,14 @@ function Start-BuildFarm() {
 # -------------------------------------------------------------------------------------------------------------------- #
 
 function Start-BuildImage() {
+  # Start build log.
+  Start-Transcript -Path "$($D_LOG)\wim.build.$($TS).log"
+
   # Import DISM module.
   Import-BFModule_DISM
 
   # Check directories.
   Set-BFDirs
-
-  # Start build log.
-  Start-Transcript -Path "$($D_LOG)\wim.build.$($TS).log"
 
   while ( $true ) {
 

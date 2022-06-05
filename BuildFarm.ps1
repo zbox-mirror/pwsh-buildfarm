@@ -19,6 +19,10 @@ Param(
   [Alias("CPU")]
   [string]$P_CPUArch = "amd64",
 
+  [Parameter(HelpMessage="WIM name.")]
+  [Alias("WN")]
+  [string]$P_Name = "install",
+
   [Parameter(HelpMessage="WIM language.")]
   [Alias("WL")]
   [string]$P_Language = "en-us",
@@ -70,8 +74,8 @@ function Start-BuildFarm() {
   $TS = Get-Date -Format "yyyy-MM-dd.HH-mm-ss"
 
   # WIM path.
-  $F_WIM_ORIGINAL = "$($P_Language)\install.wim"
-  $F_WIM_CUSTOM = "$($P_Language)\install.custom.$($TS).wim"
+  $F_WIM_ORIGINAL = "$($P_Language)\$($P_Name).wim"
+  $F_WIM_CUSTOM = "$($P_Language)\$($P_Name).custom.$($TS).wim"
 
   # Sleep time.
   [int]$SLEEP = 10
@@ -88,19 +92,22 @@ function Start-BuildFarm() {
 # -------------------------------------------------------------------------------------------------------------------- #
 
 function Start-BuildImage() {
+  # Start build log.
+  Start-Transcript -Path "$($D_LOG)\wim.build.$($TS).log"
+
   # Import DISM module.
   Import-BFModule_DISM
 
   # Check directories.
   Set-BFDirs
 
-  # Start build log.
-  Start-Transcript -Path "$($D_LOG)\wim.build.$($TS).log"
-
   while ( $true ) {
 
     # Check WIM file exist.
-    if ( -not ( Test-Path -Path "$($D_WIM)\$($F_WIM_ORIGINAL)" -PathType "Leaf" ) ) { break }
+    if ( -not ( Test-Path -Path "$($D_WIM)\$($F_WIM_ORIGINAL)" -PathType "Leaf" ) ) {
+      Write-Warning "'$($F_WIM_ORIGINAL)' not found!" -WarningAction Stop
+      break
+    }
 
     # Get Windows image hash.
     if ( -not $P_NoWimHash ) { Get-BFImageHash }
@@ -114,6 +121,9 @@ function Start-BuildImage() {
 
     # Mount Windows image.
     Mount-BFImage
+
+    # Add ADK WinPE packages.
+    if ( $P_Name -eq "boot" ) { Add-BFPackages_ADK_WinPE }
 
     if ( ( $P_AddPackages ) -and ( -not ( Get-ChildItem "$($D_UPD)" | Measure-Object ).Count -eq 0 ) ) {
       # Add packages.
@@ -208,6 +218,37 @@ function Mount-BFImage() {
   Write-BFMsg -T -M "--- Mount Windows Image..."
 
   Dism /Mount-Image /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /MountDir:"$($D_MNT)" /Index:$WIM_INDEX /CheckIntegrity /ScratchDir:"$($D_TMP)"
+  Start-Sleep -s $SLEEP
+}
+
+function Add-BFPackages_ADK_WinPE() {
+  Write-BFMsg -T -M "--- Add ADK WinPE Packages..."
+
+  $WinPE_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPUArch)\WinPE_OCs"
+
+  if ( -not ( Test-Path -Path "$($WinPE_Path)" ) ) {
+    Write-Warning "WinPE in '$($WinPE_Path)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop
+  }
+
+  $WinPE_Pkgs = @(
+    "WinPE-WMI"
+    "WinPE-NetFX"
+    "WinPE-Scripting"
+    "WinPE-PowerShell"
+    "WinPE-StorageWMI"
+    "WinPE-DismCmdlets"
+    "WinPE-FMAPI"
+    "WinPE-Dot3Svc"
+    "WinPE-PPPoE"
+  )
+
+  foreach ($WinPE_Pkg in $WinPE_Pkgs) {
+    Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($WinPE_Pkg).cab" /ScratchDir:"$($D_TMP)"
+    if ( Test-Path -Path "$($WinPE_Path)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" -PathType "Leaf" ) {
+      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"
+    }
+  }
+
   Start-Sleep -s $SLEEP
 }
 

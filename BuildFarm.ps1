@@ -205,7 +205,7 @@ function Import-BFModule_DISM() {
 function Set-BFDirs() {
   Write-BFMsg -T -M "--- Check & Create Directories..."
 
-  $Dirs = @(
+  $DIRs = @(
     "$($D_APP)"
     "$($D_DRV)"
     "$($D_LOG)"
@@ -215,8 +215,8 @@ function Set-BFDirs() {
     "$($D_WIM)"
   )
 
-  foreach ($Dir in $Dirs) {
-    if ( -not ( Test-Path "$($Dir)" ) ) { New-Item -Path "$($Dir)" -ItemType "Directory" }
+  foreach ($DIR in $DIRs) {
+    if ( -not ( Test-Path "$($DIR)" ) ) { New-Item -Path "$($DIR)" -ItemType "Directory" }
   }
 }
 

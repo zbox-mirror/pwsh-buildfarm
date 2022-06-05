@@ -84,13 +84,7 @@ function Start-BuildImage() {
   Import-BFModule_DISM
 
   # Check directories.
-  if ( -not ( Test-Path "$($D_APP)" ) ) { New-Item -Path "$($D_APP)" -ItemType "Directory" }
-  if ( -not ( Test-Path "$($D_DRV)" ) ) { New-Item -Path "$($D_DRV)" -ItemType "Directory" }
-  if ( -not ( Test-Path "$($D_LOG)" ) ) { New-Item -Path "$($D_LOG)" -ItemType "Directory" }
-  if ( -not ( Test-Path "$($D_MNT)" ) ) { New-Item -Path "$($D_MNT)" -ItemType "Directory" }
-  if ( -not ( Test-Path "$($D_TMP)" ) ) { New-Item -Path "$($D_TMP)" -ItemType "Directory" }
-  if ( -not ( Test-Path "$($D_UPD)" ) ) { New-Item -Path "$($D_UPD)" -ItemType "Directory" }
-  if ( -not ( Test-Path "$($D_WIM)" ) ) { New-Item -Path "$($D_WIM)" -ItemType "Directory" }
+  Set-BFDirs
 
   # Start build log.
   Start-Transcript -Path "$($D_LOG)\wim.build.$($TS).log"
@@ -170,6 +164,24 @@ function Import-BFModule_DISM() {
 
   $Env:Path = "$($DISM_Path)"
   Import-Module "$($DISM_Path)"
+}
+
+function Set-BFDirs() {
+  Write-BFMsg -T -M "--- Check & Create Directories..."
+
+  $Dirs = @(
+    "$($D_APP)"
+    "$($D_DRV)"
+    "$($D_LOG)"
+    "$($D_MNT)"
+    "$($D_TMP)"
+    "$($D_UPD)"
+    "$($D_WIM)"
+  )
+
+  foreach ($Dir in $Dirs) {
+    if ( -not ( Test-Path "$($Dir)" ) ) { New-Item -Path "$($Dir)" -ItemType "Directory" }
+  }
 }
 
 function Get-BFImageHash() {

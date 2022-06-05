@@ -291,7 +291,7 @@ function Add-BFApps() {
 
   $Apps = Get-ChildItem -Path "$($D_APP)" -Filter "*.7z" -Recurse
   foreach ( $App in $Apps ) {
-    Expand-7z -I "$($App.FullName)" -O "$($D_MNT)\Data\Apps"
+    Expand-7z -I "$($App.FullName)" -O "$($D_MNT)\_DATA\Apps"
   }
   Start-Sleep -s $SLEEP
 }

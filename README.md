@@ -18,6 +18,8 @@
   Добавление `.cab` или `.msu` файлов в WIM.
 - `-AD`  
   Добавление драйверов в WIM.
+- `AA`  
+  Добавление приложений в WIM (директория `%SYSTEMDRIVE%\_DATA\Apps`).
 - `-RB`  
   Уменьшение размера хранилища компонентов WIM, путём удаления предыдущих версий компонентов.
 - `-SH`  
@@ -28,8 +30,6 @@
   Экспорт WIM файла в ESD формат.
 - `WPE_AP`  
   Интеграция [дополнительных компонентов](https://docs.microsoft.com/en-us/windows-hardware/manufacture/desktop/winpe-adding-powershell-support-to-windows-pe) из ADK WinPE в образ `boot.wim`. *Только для образа WinPE.*
-- `WPE_AA`  
-  Интеграция приложений в образ `boot.wim`. *Только для образа WinPE.*
 
 ## Директории
 

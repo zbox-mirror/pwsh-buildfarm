@@ -17,7 +17,7 @@ Param(
   [Parameter(HelpMessage="CPU architecture.")]
   [ValidateSet("x86", "amd64", "arm64")]
   [Alias("CPU")]
-  [string]$P_CPUArch = "amd64",
+  [string]$P_CPU = "amd64",
 
   [Parameter(HelpMessage="WIM name.")]
   [Alias("WN")]
@@ -179,7 +179,7 @@ function Start-BuildImage() {
 function Import-BFModule_DISM() {
   Write-BFMsg -T -M "--- Import DISM Module..."
 
-  $DISM_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Deployment Tools\$($P_CPUArch)\DISM"
+  $DISM_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Deployment Tools\$($P_CPU)\DISM"
 
   if ( Get-Module -Name "Dism" ) {
     Write-Warning "DISM module is already loaded in this session. Please restart your PowerShell session." -WarningAction Stop
@@ -228,7 +228,7 @@ function Mount-BFImage() {
 function Add-BFPackages_ADK_WinPE() {
   Write-BFMsg -T -M "--- Add ADK WinPE Packages..."
 
-  $WinPE_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPUArch)\WinPE_OCs"
+  $WinPE_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPU)\WinPE_OCs"
 
   if ( -not ( Test-Path -Path "$($WinPE_Path)" ) ) {
     Write-Warning "WinPE in '$($WinPE_Path)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop

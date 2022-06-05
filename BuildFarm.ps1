@@ -12,7 +12,7 @@
 Param(
   [Parameter(HelpMessage="ADK path.")]
   [Alias("ADK")]
-  [string]$P_ADKPath = "$($PSScriptRoot)\Apps\ADK",
+  [string]$P_ADK = "$($PSScriptRoot)\Apps\ADK",
 
   [Parameter(HelpMessage="CPU architecture.")]
   [ValidateSet("x86", "amd64", "arm64")]
@@ -179,18 +179,18 @@ function Start-BuildImage() {
 function Import-BFModule_DISM() {
   Write-BFMsg -T -M "--- Import DISM Module..."
 
-  $DISM_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Deployment Tools\$($P_CPU)\DISM"
+  $D_DISM = "$($P_ADK)\Assessment and Deployment Kit\Deployment Tools\$($P_CPU)\DISM"
 
   if ( Get-Module -Name "Dism" ) {
     Write-Warning "DISM module is already loaded in this session. Please restart your PowerShell session." -WarningAction Stop
   }
 
-  if ( -not ( Test-Path -Path "$($DISM_Path)\dism.exe" -PathType "Leaf" ) ) {
-    Write-Warning "DISM in '$($DISM_Path)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'." -WarningAction Stop
+  if ( -not ( Test-Path -Path "$($D_DISM)\dism.exe" -PathType "Leaf" ) ) {
+    Write-Warning "DISM in '$($D_DISM)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'." -WarningAction Stop
   }
 
-  $Env:Path = "$($DISM_Path)"
-  Import-Module "$($DISM_Path)"
+  $Env:Path = "$($D_DISM)"
+  Import-Module "$($D_DISM)"
 }
 
 function Set-BFDirs() {
@@ -228,10 +228,10 @@ function Mount-BFImage() {
 function Add-BFPackages_ADK_WinPE() {
   Write-BFMsg -T -M "--- Add ADK WinPE Packages..."
 
-  $WinPE_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPU)\WinPE_OCs"
+  $D_WinPE = "$($P_ADK)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPU)\WinPE_OCs"
 
-  if ( -not ( Test-Path -Path "$($WinPE_Path)" ) ) {
-    Write-Warning "WinPE in '$($WinPE_Path)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop
+  if ( -not ( Test-Path -Path "$($D_WinPE)" ) ) {
+    Write-Warning "WinPE in '$($D_WinPE)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop
   }
 
   $WinPE_Pkgs = @(
@@ -247,9 +247,9 @@ function Add-BFPackages_ADK_WinPE() {
   )
 
   foreach ($WinPE_Pkg in $WinPE_Pkgs) {
-    Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($WinPE_Pkg).cab" /ScratchDir:"$($D_TMP)"
-    if ( Test-Path -Path "$($WinPE_Path)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" -PathType "Leaf" ) {
-      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($WinPE_Path)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"
+    Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_WinPE)\$($WinPE_Pkg).cab" /ScratchDir:"$($D_TMP)"
+    if ( Test-Path -Path "$($D_WinPE)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" -PathType "Leaf" ) {
+      Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_WinPE)\$($P_Language)\$($WinPE_Pkg)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"
     }
   }
 

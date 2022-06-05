@@ -112,7 +112,7 @@ function Start-BuildImage() {
     if ( -not $P_NoWimHash ) { Get-BFImageHash }
 
     # Get Windows image info.
-    Write-BFMsg -Title -Message "--- Get Windows Image Info..."
+    Write-BFMsg -T -M "--- Get Windows Image Info..."
 
     Dism /Get-ImageInfo /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /ScratchDir:"$($D_TMP)"
     [int]$WIM_INDEX = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
@@ -169,7 +169,7 @@ function Start-BuildImage() {
 # -------------------------------------------------------------------------------------------------------------------- #
 
 function Import-BFModule_DISM() {
-  Write-BFMsg -Title -Message "--- Import DISM Module..."
+  Write-BFMsg -T -M "--- Import DISM Module..."
 
   $DISM_Path = "$($P_ADKPath)\Assessment and Deployment Kit\Deployment Tools\$($P_CPUArch)\DISM"
 
@@ -186,56 +186,56 @@ function Import-BFModule_DISM() {
 }
 
 function Get-BFImageHash() {
-  Write-BFMsg -Title -Message "--- Get Windows Image Hash..."
+  Write-BFMsg -T -M "--- Get Windows Image Hash..."
 
   Get-FileHash "$($D_WIM)\$($F_WIM_ORIGINAL)" -Algorithm "SHA256" | Format-List
   Start-Sleep -s $SLEEP
 }
 
 function Mount-BFImage() {
-  Write-BFMsg -Title -Message "--- Mount Windows Image..."
+  Write-BFMsg -T -M "--- Mount Windows Image..."
 
   Dism /Mount-Image /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /MountDir:"$($D_MNT)" /Index:$WIM_INDEX /CheckIntegrity /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Add-BFPackages() {
-  Write-BFMsg -Title -Message "--- Add Windows Packages..."
+  Write-BFMsg -T -M "--- Add Windows Packages..."
 
   Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_UPD)" /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Get-BFPackages() {
-  Write-BFMsg -Title -Message "--- Get Windows Packages..."
+  Write-BFMsg -T -M "--- Get Windows Packages..."
 
   Dism /Image:"$($D_MNT)" /Get-Packages /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Add-BFDrivers() {
-  Write-BFMsg -Title -Message "--- Add Windows Drivers..."
+  Write-BFMsg -T -M "--- Add Windows Drivers..."
 
   Dism /Image:"$($D_MNT)" /Add-Driver /Driver:"$($D_DRV)" /Recurse /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Start-BFResetBase() {
-  Write-BFMsg -Title -Message "--- Reset Windows Image..."
+  Write-BFMsg -T -M "--- Reset Windows Image..."
 
   Dism /Image:"$($D_MNT)" /Cleanup-Image /StartComponentCleanup /ResetBase /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Start-BFScanHealth() {
-  Write-BFMsg -Title -Message "--- Scan Health Windows Image..."
+  Write-BFMsg -T -M "--- Scan Health Windows Image..."
 
   Dism /Image:"$($D_MNT)" /Cleanup-Image /ScanHealth /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Dismount-BFImage_Commit() {
-  Write-BFMsg -Title -Message "--- Save & Dismount Windows Image..."
+  Write-BFMsg -T -M "--- Save & Dismount Windows Image..."
 
   Write-Warning "WIM file will be save and dismount. Make additional edits to image." -WarningAction Inquire
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Commit /ScratchDir:"$($D_TMP)"
@@ -243,7 +243,7 @@ function Dismount-BFImage_Commit() {
 }
 
 function Dismount-BFImage_Discard() {
-  Write-BFMsg -Title -Message "--- Discard & Dismount Windows Image..."
+  Write-BFMsg -T -M "--- Discard & Dismount Windows Image..."
 
   Write-Warning "WIM file will be discard and dismount. All changes will be lost." -WarningAction Inquire
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Discard /ScratchDir:"$($D_TMP)"
@@ -251,26 +251,26 @@ function Dismount-BFImage_Discard() {
 }
 
 function Export-BFImage_ESD() {
-  Write-BFMsg -Title -Message "--- Export Windows Image to Custom ESD Format..."
+  Write-BFMsg -T -M "--- Export Windows Image to Custom ESD Format..."
 
   Dism /Export-Image /SourceImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /SourceIndex:$WIM_INDEX /DestinationImageFile:"$($D_WIM)\$($F_WIM_CUSTOM).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Export-BFImage_WIM() {
-  Write-BFMsg -Title -Message "--- Export Windows Image to Custom WIM Format..."
+  Write-BFMsg -T -M "--- Export Windows Image to Custom WIM Format..."
 
   Dism /Export-Image /SourceImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /SourceIndex:$WIM_INDEX /DestinationImageFile:"$($D_WIM)\$($F_WIM_CUSTOM)" /Compress:max /CheckIntegrity /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Compress-BFImage() {
-  Write-BFMsg -Title -Message "--- Create Windows Image Archive..."
+  Write-BFMsg -T -M "--- Create Windows Image Archive..."
 
   if ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM).esd" -PathType "Leaf" ) {
-    Compress-7z -App "$($D_APP)\7z\7za.exe" -In "$($D_WIM)\$($F_WIM_CUSTOM).esd" -Out "$($D_WIM)\$($F_WIM_CUSTOM).esd.7z"
+    Compress-7z -A "$($D_APP)\7z\7za.exe" -I "$($D_WIM)\$($F_WIM_CUSTOM).esd" -O "$($D_WIM)\$($F_WIM_CUSTOM).esd.7z"
   } elseif ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM)" -PathType "Leaf" ) {
-    Compress-7z -App "$($D_APP)\7z\7za.exe" -In "$($D_WIM)\$($F_WIM_CUSTOM)" -Out "$($D_WIM)\$($F_WIM_CUSTOM).7z"
+    Compress-7z -A "$($D_APP)\7z\7za.exe" -I "$($D_WIM)\$($F_WIM_CUSTOM)" -O "$($D_WIM)\$($F_WIM_CUSTOM).7z"
   } else {
     Write-Host "Not Found: '$($F_WIM_CUSTOM)' or '$($F_WIM_CUSTOM).esd'."
   }
@@ -279,7 +279,9 @@ function Compress-BFImage() {
 
 function Write-BFMsg() {
   param (
+    [Alias("M")]
     [string]$Message,
+    [Alias("T")]
     [switch]$Title = $false
   )
 
@@ -292,8 +294,11 @@ function Write-BFMsg() {
 
 function Compress-7z() {
   param (
+    [Alias("A")]
     [string]$App,
+    [Alias("I")]
     [string]$In,
+    [Alias("O")]
     [string]$Out
   )
 

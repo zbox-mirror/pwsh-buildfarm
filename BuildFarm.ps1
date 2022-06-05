@@ -293,6 +293,7 @@ function Add-BFApps() {
   foreach ( $App in $Apps ) {
     Expand-7z -I "$($App.FullName)" -O "$($D_MNT)\Data\Apps"
   }
+  Start-Sleep -s $SLEEP
 }
 
 function Start-BFResetBase() {

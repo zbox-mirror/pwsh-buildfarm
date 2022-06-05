@@ -41,7 +41,7 @@ Param(
 
   [Parameter(HelpMessage="Saves the changes to a Windows image.")]
   [Alias("SI")]
-  [switch]$P_SaveImage = $false,
+  [switch]$P_SaveImage = $false
 )
 
 # -------------------------------------------------------------------------------------------------------------------- #

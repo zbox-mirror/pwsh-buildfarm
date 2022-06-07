@@ -199,7 +199,7 @@ function Import-BFModule_DISM() {
   }
 
   $Env:Path = "$($D_DISM)"
-  # Import-Module "$($D_DISM)"
+  Import-Module "$($D_DISM)"
 }
 
 function Set-BFDirs() {

@@ -15,7 +15,7 @@ Param(
   [string]$P_ADK = "$($PSScriptRoot)\_META\ADK",
 
   [Parameter(HelpMessage="CPU architecture.")]
-  [ValidateSet("x86", "amd64", "arm64")]
+  [ValidateSet("x86", "amd64", "arm", "arm64")]
   [Alias("CPU")]
   [string]$P_CPU = "amd64",
 

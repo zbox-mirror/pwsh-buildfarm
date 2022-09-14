@@ -215,7 +215,7 @@ function Set-BFDirs() {
     "$($D_WIM)"
   )
 
-  foreach ($DIR in $DIRs) {
+  foreach ( $DIR in $DIRs ) {
     if ( -not ( Test-Path "$($DIR)" ) ) { New-Item -Path "$($DIR)" -ItemType "Directory" }
   }
 }
@@ -255,7 +255,7 @@ function Add-BFPackages_WinPE() {
     "WinPE-PPPoE"
   )
 
-  foreach ($PKG in $PKGs) {
+  foreach ( $PKG in $PKGs ) {
     Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_WPE)\$($PKG).cab" /ScratchDir:"$($D_TMP)"
     if ( Test-Path -Path "$($D_WPE)\$($P_Language)\$($PKG)_$($P_Language).cab" -PathType "Leaf" ) {
       Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_WPE)\$($P_Language)\$($PKG)_$($P_Language).cab" /ScratchDir:"$($D_TMP)"

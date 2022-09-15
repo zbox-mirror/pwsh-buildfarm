@@ -356,7 +356,7 @@ function Compress-BFImage() {
 function Write-BFMsg() {
   param (
     [Alias("M")]
-    [string]$Message,
+    [string]$Message = "",
 
     [Alias("T")]
     [string]$Type = "",

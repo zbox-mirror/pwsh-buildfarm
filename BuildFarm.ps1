@@ -388,11 +388,15 @@ function Compress-7z() {
   param (
     [Alias("I")]
     [string]$In,
+
     [Alias("O")]
-    [string]$Out
+    [string]$Out,
+
+    [Alias("T")]
+    [string]$Type = "7z"
   )
 
-  $7zParams = "a", "-t7z", "$($Out)", "$($In)"
+  $7zParams = "a", "-t$($Type)", "$($Out)", "$($In)"
   & "$($PSScriptRoot)\_META\7z\7za.exe" @7zParams
 }
 

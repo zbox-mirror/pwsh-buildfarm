@@ -387,10 +387,10 @@ function Write-BFMsg() {
 function Compress-7z() {
   param (
     [Alias("I")]
-    [string]$In,
+    [string]$In = "",
 
     [Alias("O")]
-    [string]$Out,
+    [string]$Out = "",
 
     [Alias("T")]
     [string]$Type = "7z"
@@ -403,9 +403,10 @@ function Compress-7z() {
 function Expand-7z() {
   param (
     [Alias("I")]
-    [string]$In,
+    [string]$In = "",
+
     [Alias("O")]
-    [string]$Out
+    [string]$Out = ""
   )
 
   $7zParams = "x", "$($In)", "-o$($Out)", "-aoa"

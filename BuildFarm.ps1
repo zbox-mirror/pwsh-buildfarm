@@ -356,10 +356,10 @@ function Compress-BFImage() {
 function Write-BFMsg() {
   param (
     [Alias("M")]
-    [string]$Message = "",
+    [string]$Message,
 
     [Alias("T")]
-    [string]$Type = "",
+    [string]$Type,
 
     [Alias("A")]
     [string]$Action = "Continue"
@@ -387,10 +387,10 @@ function Write-BFMsg() {
 function Compress-7z() {
   param (
     [Alias("I")]
-    [string]$In = "",
+    [string]$In,
 
     [Alias("O")]
-    [string]$Out = "",
+    [string]$Out,
 
     [Alias("T")]
     [string]$Type = "7z"
@@ -403,10 +403,10 @@ function Compress-7z() {
 function Expand-7z() {
   param (
     [Alias("I")]
-    [string]$In = "",
+    [string]$In,
 
     [Alias("O")]
-    [string]$Out = ""
+    [string]$Out
   )
 
   $7zParams = "x", "$($In)", "-o$($Out)", "-aoa"

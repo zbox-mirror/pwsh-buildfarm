@@ -113,7 +113,7 @@ function Start-BuildImage() {
 
     # Check WIM file exist.
     if ( -not ( Test-Path -Path "$($D_WIM)\$($F_WIM_ORIGINAL)" -PathType "Leaf" ) ) {
-      Write-Warning "'$($F_WIM_ORIGINAL)' not found!" -WarningAction Stop
+      Write-BFMsg -T "W" -A "Stop" -M "'$($F_WIM_ORIGINAL)' not found!"
       break
     }
 
@@ -121,7 +121,7 @@ function Start-BuildImage() {
     if ( -not $P_NoWimHash ) { Get-BFImageHash }
 
     # Get Windows image info.
-    Write-BFMsg -T "HL" -M "--- Get Windows Image Info..."
+    Write-BFMsg -T "HL" -M "Get Windows Image Info..."
 
     Dism /Get-ImageInfo /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /ScratchDir:"$($D_TMP)"
     [int]$WIM_INDEX = Read-Host "Enter WIM index (Press [ENTER] to EXIT)"
@@ -186,16 +186,16 @@ function Start-BuildImage() {
 # -------------------------------------------------------------------------------------------------------------------- #
 
 function Import-BFModule_DISM() {
-  Write-BFMsg -T "HL" -M "--- Import DISM Module..."
+  Write-BFMsg -T "HL" -M "Import DISM Module..."
 
   $D_DISM = "$($P_ADK)\Assessment and Deployment Kit\Deployment Tools\$($P_CPU)\DISM"
 
   if ( Get-Module -Name "Dism" ) {
-    Write-Warning "DISM module is already loaded in this session. Please restart your PowerShell session." -WarningAction Stop
+    Write-BFMsg -T "W" -A "Stop" -M "DISM module is already loaded in this session. Please restart your PowerShell session."
   }
 
   if ( -not ( Test-Path -Path "$($D_DISM)\dism.exe" -PathType "Leaf" ) ) {
-    Write-Warning "DISM in '$($D_DISM)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'." -WarningAction Stop
+    Write-BFMsg -T "W" -A "Stop" -M "DISM in '$($D_DISM)' not found. Please install DISM from 'https://go.microsoft.com/fwlink/?linkid=2196127'."
   }
 
   $Env:Path = "$($D_DISM)"
@@ -203,7 +203,7 @@ function Import-BFModule_DISM() {
 }
 
 function Set-BFDirs() {
-  Write-BFMsg -T "HL" -M "--- Check & Create Directories..."
+  Write-BFMsg -T "HL" -M "Check & Create Directories..."
 
   $DIRs = @(
     "$($D_APP)"
@@ -221,26 +221,26 @@ function Set-BFDirs() {
 }
 
 function Get-BFImageHash() {
-  Write-BFMsg -T "HL" -M "--- Get Windows Image Hash..."
+  Write-BFMsg -T "HL" -M "Get Windows Image Hash..."
 
   Get-FileHash "$($D_WIM)\$($F_WIM_ORIGINAL)" -Algorithm "SHA256" | Format-List
   Start-Sleep -s $SLEEP
 }
 
 function Mount-BFImage() {
-  Write-BFMsg -T "HL" -M "--- Mount Windows Image..."
+  Write-BFMsg -T "HL" -M "Mount Windows Image..."
 
   Dism /Mount-Image /ImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /MountDir:"$($D_MNT)" /Index:$WIM_INDEX /CheckIntegrity /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Add-BFPackages_WinPE() {
-  Write-BFMsg -T "HL" -M "--- Add ADK WinPE Packages..."
+  Write-BFMsg -T "HL" -M "Add ADK WinPE Packages..."
 
   $D_WPE = "$($P_ADK)\Assessment and Deployment Kit\Windows Preinstallation Environment\$($P_CPU)\WinPE_OCs"
 
   if ( -not ( Test-Path -Path "$($D_WPE)" ) ) {
-    Write-Warning "WinPE in '$($D_WPE)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'." -WarningAction Stop
+    Write-BFMsg -T "W" -A "Stop" -M "WinPE in '$($D_WPE)' not found. Please install WinPE from 'https://go.microsoft.com/fwlink/?linkid=2196224'."
   }
 
   $PKGs = @(
@@ -266,28 +266,28 @@ function Add-BFPackages_WinPE() {
 }
 
 function Add-BFPackages() {
-  Write-BFMsg -T "HL" -M "--- Add Windows Packages..."
+  Write-BFMsg -T "HL" -M "Add Windows Packages..."
 
   Dism /Image:"$($D_MNT)" /Add-Package /PackagePath:"$($D_UPD)" /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Get-BFPackages() {
-  Write-BFMsg -T "HL" -M "--- Get Windows Packages..."
+  Write-BFMsg -T "HL" -M "Get Windows Packages..."
 
   Dism /Image:"$($D_MNT)" /Get-Packages /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Add-BFDrivers() {
-  Write-BFMsg -T "HL" -M "--- Add Windows Drivers..."
+  Write-BFMsg -T "HL" -M "Add Windows Drivers..."
 
   Dism /Image:"$($D_MNT)" /Add-Driver /Driver:"$($D_DRV)" /Recurse /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Add-BFApps() {
-  Write-BFMsg -T "HL" -M "--- Add Windows Apps..."
+  Write-BFMsg -T "HL" -M "Add Windows Apps..."
 
   $Apps = Get-ChildItem -Path "$($D_APP)" -Filter "*.7z" -Recurse
   foreach ( $App in $Apps ) {
@@ -297,58 +297,58 @@ function Add-BFApps() {
 }
 
 function Start-BFResetBase() {
-  Write-BFMsg -T "HL" -M "--- Reset Windows Image..."
+  Write-BFMsg -T "HL" -M "Reset Windows Image..."
 
   Dism /Image:"$($D_MNT)" /Cleanup-Image /StartComponentCleanup /ResetBase /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Start-BFScanHealth() {
-  Write-BFMsg -T "HL" -M "--- Scan Health Windows Image..."
+  Write-BFMsg -T "HL" -M "Scan Health Windows Image..."
 
   Dism /Image:"$($D_MNT)" /Cleanup-Image /ScanHealth /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Dismount-BFImage_Commit() {
-  Write-BFMsg -T "HL" -M "--- Save & Dismount Windows Image..."
+  Write-BFMsg -T "HL" -M "Save & Dismount Windows Image..."
 
-  Write-Warning "WIM file will be save and dismount. Make additional edits to image." -WarningAction Inquire
+  Write-BFMsg -T "W" -A "Inquire" -M "WIM file will be save and dismount. Make additional edits to image."
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Commit /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Dismount-BFImage_Discard() {
-  Write-BFMsg -T "HL" -M "--- Discard & Dismount Windows Image..."
+  Write-BFMsg -T "HL" -M "Discard & Dismount Windows Image..."
 
-  Write-Warning "WIM file will be discard and dismount. All changes will be lost." -WarningAction Inquire
+  Write-BFMsg -T "W" -A "Inquire" -M "WIM file will be discard and dismount. All changes will be lost."
   Dism /Unmount-Image /MountDir:"$($D_MNT)" /Discard /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Export-BFImage_ESD() {
-  Write-BFMsg -T "HL" -M "--- Export Windows Image to Custom ESD Format..."
+  Write-BFMsg -T "HL" -M "Export Windows Image to Custom ESD Format..."
 
   Dism /Export-Image /SourceImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /SourceIndex:$WIM_INDEX /DestinationImageFile:"$($D_WIM)\$($F_WIM_CUSTOM).esd" /Compress:recovery /CheckIntegrity /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Export-BFImage_WIM() {
-  Write-BFMsg -T "HL" -M "--- Export Windows Image to Custom WIM Format..."
+  Write-BFMsg -T "HL" -M "Export Windows Image to Custom WIM Format..."
 
   Dism /Export-Image /SourceImageFile:"$($D_WIM)\$($F_WIM_ORIGINAL)" /SourceIndex:$WIM_INDEX /DestinationImageFile:"$($D_WIM)\$($F_WIM_CUSTOM)" /Compress:max /CheckIntegrity /ScratchDir:"$($D_TMP)"
   Start-Sleep -s $SLEEP
 }
 
 function Compress-BFImage() {
-  Write-BFMsg -T "HL" -M "--- Create Windows Image Archive..."
+  Write-BFMsg -T "HL" -M "Create Windows Image Archive..."
 
   if ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM).esd" -PathType "Leaf" ) {
     Compress-7z -I "$($D_WIM)\$($F_WIM_CUSTOM).esd" -O "$($D_WIM)\$($F_WIM_CUSTOM).esd.7z"
   } elseif ( Test-Path -Path "$($D_WIM)\$($F_WIM_CUSTOM)" -PathType "Leaf" ) {
     Compress-7z -I "$($D_WIM)\$($F_WIM_CUSTOM)" -O "$($D_WIM)\$($F_WIM_CUSTOM).7z"
   } else {
-    Write-Host "Not Found: '$($F_WIM_CUSTOM)' or '$($F_WIM_CUSTOM).esd'."
+    Write-BFMsg -T "W" -M "Not Found: '$($F_WIM_CUSTOM)' or '$($F_WIM_CUSTOM).esd'."
   }
   Start-Sleep -s $SLEEP
 }
@@ -357,16 +357,26 @@ function Write-BFMsg() {
   param (
     [Alias("M")]
     [string]$Message,
+
     [Alias("T")]
-    [string]$Type = ""
+    [string]$Type = "",
+
+    [Alias("A")]
+    [string]$Action = "Continue"
   )
 
   switch ( $Type ) {
     "HL" {
-      Write-Host "$($NL)$($Message)" -ForegroundColor Blue
+      Write-Host "$($NL)--- $($Message)" -ForegroundColor Blue
     }
-    "Error" {
-      Write-Host "[ERROR] $($Message)" -ForegroundColor Red
+    "I" {
+      Write-Information -MessageData "$($Message)" -InformationAction "$($Action)"
+    }
+    "W" {
+      Write-Warning -Message "$($Message)" -WarningAction "$($Action)"
+    }
+    "E" {
+      Write-Error -Message "$($Message)" -ErrorAction "$($Action)"
     }
     default {
       Write-Host "$($Message)"
